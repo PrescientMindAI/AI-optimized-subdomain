@@ -1,5 +1,7 @@
 # AI-Optimized Subdomain - Beta Test Branch
 
+> **Developed by [AllioIA.ai](https://allioia.ai)** - Pioneering AI-optimized e-commerce data standards for superior LLM consumption and enhanced AI agent interactions.
+
 ## Overview
 
 The **AI-Optimized Subdomain** project defines the open-source specifications, protocols, and data formats that are served on `ai.domain.xyz` subdomains. This project provides the technical documentation and implementation guidelines for the AI-ready format that enables AI agents, LLMs, and AI browsers to efficiently consume e-commerce data with client isolation and trust integration.
@@ -149,7 +151,7 @@ AI agents can efficiently access client-scoped data to:
 - **Scoped comparisons**: Compare products within the specific vendor's catalog
 
 ### Research and Analytics
-- **Market trend analysis**: Through future AllioIA.io broader access
+- **Market trend analysis**: Through future AllioIA.ai broader access
 - **Client performance insights**: Trust metrics and review analysis per domain
 - **Product category insights**: Relationships and hierarchies within client catalogs
 - **Consumer behavior modeling**: Review patterns and preference indicators
@@ -186,6 +188,28 @@ This will test:
 - ✅ DPP authenticity verification and EU compliance
 - ✅ LLM-optimized data formats
 - ✅ Product compliance and market access
+
+## About AllioIA.ai
+
+**AllioIA.ai** is pioneering the future of AI-optimized e-commerce data standards. Our mission is to provide superior data for LLMs and AI agents compared to regular e-commerce websites, enabling enhanced AI consumption and decision-making.
+
+### **Our Vision**
+- **AI-First Data Standards**: Creating data formats optimized for AI consumption
+- **Enhanced LLM Performance**: 40-60% better query understanding and 60-70% token reduction
+- **Trust Integration**: Quality certifications, authenticity verification, and regulatory compliance
+- **Client Isolation**: Secure, scoped data access for each e-commerce client
+- **Industry Standards**: Establishing universal protocols for AI-e-commerce interaction
+
+### **Key Innovations**
+- **RefKG Integration**: Query decomposition and knowledge reconstruction
+- **I40KG Standards**: Quality certifications and supply chain transparency
+- **DPP Compliance**: EU regulatory compliance and authenticity verification
+- **Multi-Format Support**: Vectorized, MCP, ACP, and Raw Graph formats
+
+### **Contact & Resources**
+- **Website**: [https://allioia.ai](https://allioia.ai)
+- **Documentation**: Complete specifications and implementation guides
+- **Support**: Enterprise integration and custom development services
 
 ## Contributing
 
@@ -235,7 +259,7 @@ This is an open-source project aimed at establishing industry standards. Contrib
 - [x] **Enhanced**: LLM-optimized data formats for efficient consumption
 
 ### Phase 4: Broader Access & Scaling
-- [ ] Design AllioIA.io broader access architecture
+- [ ] Design AllioIA.ai broader access architecture
 - [ ] Implement cross-client insights with privacy controls
 - [ ] Create developer documentation and SDK
 - [ ] Establish enterprise integration standards
