@@ -151,7 +151,7 @@ AI agents can efficiently access client-scoped data to:
 - **Scoped comparisons**: Compare products within the specific vendor's catalog
 
 ### Research and Analytics
-- **Market trend analysis**: Through future AllioIA.ai broader access
+- **Market trend analysis**: Through future AllioIA.org broader access
 - **Client performance insights**: Trust metrics and review analysis per domain
 - **Product category insights**: Relationships and hierarchies within client catalogs
 - **Consumer behavior modeling**: Review patterns and preference indicators
@@ -191,7 +191,7 @@ This will test:
 
 ## About AllioIA.ai
 
-**AllioIA.ai** is pioneering the future of AI-optimized e-commerce data standards. Our mission is to provide superior data for LLMs and AI agents compared to regular e-commerce websites, enabling enhanced AI consumption and decision-making.
+**AllioIA.ai** is pioneering the future of AI-optimized e-commerce data standards. Our mission is to provide superior data for LLMs and AI agents compared to regular e-commerce websites, enabling enhanced AI consumption and decision-making. This project is part of our open source initiative at **AllioIA.org**.
 
 ### **Our Vision**
 - **AI-First Data Standards**: Creating data formats optimized for AI consumption
@@ -207,7 +207,8 @@ This will test:
 - **Multi-Format Support**: Vectorized, MCP, ACP, and Raw Graph formats
 
 ### **Contact & Resources**
-- **Website**: [https://allioia.ai](https://allioia.ai)
+- **Company Website**: [https://allioia.ai](https://allioia.ai)
+- **Open Source Project**: [https://allioia.org](https://allioia.org)
 - **Documentation**: Complete specifications and implementation guides
 - **Support**: Enterprise integration and custom development services
 
@@ -259,7 +260,7 @@ This is an open-source project aimed at establishing industry standards. Contrib
 - [x] **Enhanced**: LLM-optimized data formats for efficient consumption
 
 ### Phase 4: Broader Access & Scaling
-- [ ] Design AllioIA.ai broader access architecture
+- [ ] Design AllioIA.org broader access architecture
 - [ ] Implement cross-client insights with privacy controls
 - [ ] Create developer documentation and SDK
 - [ ] Establish enterprise integration standards
