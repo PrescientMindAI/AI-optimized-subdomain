@@ -1,0 +1,61 @@
+{
+  "name": "ai-optimized-subdomain",
+  "version": "1.0.0",
+  "description": "AI-optimized subdomain specifications and implementation for e-commerce knowledge graphs",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "test": "jest",
+    "build": "tsc",
+    "lint": "eslint src/**/*.js",
+    "format": "prettier --write src/**/*.js",
+    "migrate:demo": "node scripts/migrate-demo-data.js",
+    "migrate:demo:validate": "node scripts/migrate-demo-data.js validate",
+    "test:enhanced": "node scripts/test-enhanced-ai.js",
+    "benchmark": "node scripts/benchmark-test.js",
+    "deploy:first-client": "node scripts/deploy-first-client.js",
+    "validate:csv": "node scripts/validate-csv.js"
+  },
+  "keywords": [
+    "ai",
+    "knowledge-graph",
+    "e-commerce",
+    "subdomain",
+    "mcp",
+    "acp",
+    "vector",
+    "semantic-search"
+  ],
+  "author": "AI-Optimized Subdomain Team",
+  "license": "MIT",
+  "dependencies": {
+    "apollo-server-express": "^3.12.1",
+    "axios": "^1.6.0",
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "csv-parser": "^3.2.0",
+    "dotenv": "^16.3.1",
+    "express": "^4.18.2",
+    "graphql": "^16.8.1",
+    "helmet": "^7.1.0",
+    "joi": "^17.11.0",
+    "jsonwebtoken": "^9.0.2",
+    "neo4j-driver": "^5.15.0",
+    "node-cache": "^5.1.2",
+    "redis": "^4.6.10",
+    "uuid": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.9.0",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "nodemon": "^3.0.1",
+    "prettier": "^3.1.0",
+    "typescript": "^5.2.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
