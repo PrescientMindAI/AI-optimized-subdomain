@@ -47,22 +47,22 @@ Defines the structure for representing e-commerce data as interconnected knowled
 #### 1. Vectorized Data Format
 - **Purpose**: Enable semantic similarity search and efficient filtering
 - **Use Case**: AI agents finding products based on natural language queries
-- **Specification**: [To be documented]
+- **Specification**: [📋 Vectorized Format Specification](docs/SPECIFICATIONS.md#1-vectorized-data-format)
 
 #### 2. MCP (Model Context Protocol)
 - **Purpose**: Direct integration with AI models and language models
 - **Use Case**: LLMs accessing structured product data as context
-- **Specification**: [To be documented]
+- **Specification**: [📋 MCP Format Specification](docs/SPECIFICATIONS.md#2-mcp-model-context-protocol)
 
 #### 3. ACP (AI Context Protocol)  
 - **Purpose**: Standardized communication between AI agents and data sources
 - **Use Case**: Multi-agent systems coordinating product research and recommendations
-- **Specification**: [To be documented]
+- **Specification**: [📋 ACP Format Specification](docs/SPECIFICATIONS.md#3-acp-ai-context-protocol)
 
 #### 4. Raw Graph Format
 - **Purpose**: Direct knowledge graph queries and traversal
 - **Use Case**: Complex AI reasoning over product relationships
-- **Specification**: [To be documented]
+- **Specification**: [📋 Raw Graph Format Specification](docs/SPECIFICATIONS.md#4-raw-graph-format)
 
 ## Key Benefits for AI Systems
 
@@ -200,6 +200,12 @@ This is an open-source project aimed at establishing industry standards. Contrib
 
 - **Parent Project**: AI Web Server (`../`) - Implementation of these specifications
 - **E-commerce Plugins**: Data source implementations for various platforms
+
+### **📋 Documentation**
+- **[Data Format Specifications](docs/SPECIFICATIONS.md)**: Complete specifications for all four data formats
+- **[CSV Template Guide](docs/CSV_TEMPLATE_GUIDE.md)**: WooCommerce CSV import guide
+- **[Deployment Strategy](DEPLOYMENT_STRATEGY.md)**: First client deployment approach
+- **[Integration Plans](REFKG_INTEGRATION_PLAN.md)**: Detailed implementation plans
 
 ## Roadmap
 
