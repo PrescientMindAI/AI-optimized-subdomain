@@ -6,67 +6,24 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import ClientConfigManager from '../config/client-config.js';
 
 export class ClientService {
   constructor() {
-    // In-memory storage for clients (in production, use database)
-    this.clients = new Map();
+    // In-memory storage for agents and sessions
     this.agents = new Map();
     this.sessions = new Map();
     
-    // Initialize with some test clients
-    this.initializeTestClients();
+    // Initialize configuration manager
+    this.configManager = new ClientConfigManager();
+    this.initializeConfig();
   }
 
   /**
-   * Initialize test clients for development
+   * Initialize configuration
    */
-  initializeTestClients() {
-    const testClients = [
-      {
-        id: 'freshapples',
-        name: 'Fresh Apples Orchard',
-        domain: 'freshapples.com',
-        apiKey: 'test-api-key-freshapples',
-        status: 'active',
-        createdAt: new Date(),
-        metadata: {
-          industry: 'agriculture',
-          region: 'pacific-northwest',
-          productTypes: ['fruits', 'vegetables', 'organic']
-        }
-      },
-      {
-        id: 'techstore',
-        name: 'Tech Store',
-        domain: 'techstore.com',
-        apiKey: 'test-api-key-techstore',
-        status: 'active',
-        createdAt: new Date(),
-        metadata: {
-          industry: 'electronics',
-          region: 'global',
-          productTypes: ['computers', 'phones', 'accessories']
-        }
-      },
-      {
-        id: 'bookstore',
-        name: 'Online Bookstore',
-        domain: 'bookstore.com',
-        apiKey: 'test-api-key-bookstore',
-        status: 'active',
-        createdAt: new Date(),
-        metadata: {
-          industry: 'publishing',
-          region: 'global',
-          productTypes: ['books', 'ebooks', 'audiobooks']
-        }
-      }
-    ];
-
-    testClients.forEach(client => {
-      this.clients.set(client.id, client);
-    });
+  async initializeConfig() {
+    await this.configManager.loadConfig();
   }
 
   /**
@@ -75,7 +32,9 @@ export class ClientService {
    * @returns {object|null} - Client object if authenticated, null otherwise
    */
   authenticateClient(apiKey) {
-    for (const [clientId, client] of this.clients) {
+    const clients = this.configManager.getAllClients();
+    
+    for (const client of clients) {
       if (client.apiKey === apiKey && client.status === 'active') {
         return client;
       }
@@ -89,7 +48,7 @@ export class ClientService {
    * @returns {object|null} - Client object if found, null otherwise
    */
   getClient(clientId) {
-    return this.clients.get(clientId) || null;
+    return this.configManager.getClient(clientId);
   }
 
   /**
@@ -97,7 +56,7 @@ export class ClientService {
    * @param {object} clientData - Client registration data
    * @returns {object} - Registered client object
    */
-  registerClient(clientData) {
+  async registerClient(clientData) {
     const clientId = clientData.id || this.generateClientId(clientData.domain);
     
     const client = {
@@ -111,8 +70,34 @@ export class ClientService {
       metadata: clientData.metadata || {}
     };
 
-    this.clients.set(clientId, client);
-    return client;
+    return await this.configManager.addClient(client);
+  }
+
+  /**
+   * Update client
+   * @param {string} clientId - Client ID
+   * @param {object} updates - Updates to apply
+   * @returns {object|null} - Updated client or null if not found
+   */
+  async updateClient(clientId, updates) {
+    return await this.configManager.updateClient(clientId, updates);
+  }
+
+  /**
+   * Remove client
+   * @param {string} clientId - Client ID
+   * @returns {boolean} - Success status
+   */
+  async removeClient(clientId) {
+    return await this.configManager.removeClient(clientId);
+  }
+
+  /**
+   * Get all clients
+   * @returns {array} - Array of all clients
+   */
+  getAllClients() {
+    return this.configManager.getAllClients();
   }
 
   /**

@@ -1,0 +1,38 @@
+{
+  "id": "divocco-inc",
+  "name": "Divocco Inc.",
+  "domain": "divoccomedical.com",
+  "subdomain": "divoccomedical.com",
+  "apiKey": "api-key-divocco-1754398731729",
+  "status": "active",
+  "features": [
+    "refkg",
+    "i40kg",
+    "dpp"
+  ],
+  "deployment_date": "2025-08-05T12:58:51.729Z",
+  "metadata": {
+    "industry": "medical_supplies",
+    "region": "CA",
+    "productTypes": [
+      "medical_gloves",
+      "dental_supplies",
+      "sterilization_products"
+    ],
+    "business": {
+      "registrationNumber": "CA123456789",
+      "validationStatus": "verified",
+      "validationDate": "2024-01-01",
+      "trustScore": 0.95
+    },
+    "primaryDomain": "divoccomedical.com",
+    "aiSubdomain": "ai.divoccomedical.com",
+    "relatedDomains": [
+      {
+        "domain": "divocco.ca",
+        "region": "CA",
+        "relationship": "regional-variant"
+      }
+    ]
+  }
+}

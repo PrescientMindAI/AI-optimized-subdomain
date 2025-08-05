@@ -13,10 +13,12 @@
     "format": "prettier --write src/**/*.js",
     "migrate:demo": "node scripts/migrate-demo-data.js",
     "migrate:demo:validate": "node scripts/migrate-demo-data.js validate",
-    "test:enhanced": "node scripts/test-enhanced-ai.js",
-    "benchmark": "node scripts/benchmark-test.js",
-    "deploy:first-client": "node scripts/deploy-first-client.js",
-    "validate:csv": "node scripts/validate-csv.js"
+          "test:enhanced": "node scripts/test-enhanced-ai.js",
+      "benchmark": "node scripts/benchmark-test.js",
+      "benchmark:scientific": "node scripts/scientific-benchmark.js",
+      "benchmark:llm": "node scripts/llm-centric-benchmark.js",
+      "deploy:first-client": "node scripts/deploy-first-client.js",
+      "validate:csv": "node scripts/validate-csv.js"
   },
   "keywords": [
     "ai",
@@ -34,6 +36,7 @@
     "apollo-server-express": "^3.12.1",
     "axios": "^1.6.0",
     "bcryptjs": "^2.4.3",
+    "cheerio": "^1.1.2",
     "cors": "^2.8.5",
     "csv-parser": "^3.2.0",
     "dotenv": "^16.3.1",

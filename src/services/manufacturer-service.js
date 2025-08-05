@@ -6,73 +6,145 @@
 
 export class ManufacturerService {
   constructor() {
-    // Initialize mock manufacturer data
+    // Initialize with empty manufacturer storage - manufacturers will be added dynamically
     this.manufacturers = new Map();
-    this.initializeMockManufacturers();
   }
 
   /**
-   * Initialize mock manufacturer data
+   * Create a new manufacturer
+   * @param {object} manufacturerData - Manufacturer data
+   * @returns {object} - Created manufacturer object
    */
-  initializeMockManufacturers() {
-    const mockManufacturers = [
-      {
-        name: 'Fresh Apples Orchard',
-        officialUrl: 'https://freshapplesorchard.com',
-        certifications: [
-          'USDA Organic',
-          'Fair Trade Certified',
-          'ISO 9001',
-          'GAP Certified'
-        ],
-        verified: true,
-        trustScore: 0.95,
-        metadata: {
-          founded: 1985,
-          location: 'Pacific Northwest',
-          employees: 150,
-          annualRevenue: '$5M'
-        }
-      },
-      {
-        name: 'Apple Inc.',
-        officialUrl: 'https://www.apple.com',
-        certifications: [
-          'ISO 9001',
-          'ISO 14001',
-          'Energy Star',
-          'EPEAT Gold'
-        ],
-        verified: true,
-        trustScore: 0.98,
-        metadata: {
-          founded: 1976,
-          location: 'Cupertino, CA',
-          employees: 164000,
-          annualRevenue: '$394B'
-        }
-      },
-      {
-        name: 'Scribner',
-        officialUrl: 'https://www.simonandschuster.com/imprints/Scribner',
-        certifications: [
-          'ISO 9001',
-          'FSC Certified'
-        ],
-        verified: true,
-        trustScore: 0.92,
-        metadata: {
-          founded: 1846,
-          location: 'New York, NY',
-          employees: 500,
-          annualRevenue: '$50M'
-        }
-      }
-    ];
+  createManufacturer(manufacturerData) {
+    const manufacturer = {
+      id: manufacturerData.id,
+      name: manufacturerData.name,
+      officialUrl: manufacturerData.officialUrl || null,
+      certifications: manufacturerData.certifications || [],
+      verified: manufacturerData.verified || false,
+      trustScore: manufacturerData.trustScore || 0.8,
+      createdAt: manufacturerData.createdAt || new Date(),
+      updatedAt: new Date(),
+      metadata: manufacturerData.metadata || {}
+    };
 
-    mockManufacturers.forEach(manufacturer => {
-      this.manufacturers.set(manufacturer.name, manufacturer);
+    this.manufacturers.set(manufacturer.id, manufacturer);
+    return manufacturer;
+  }
+
+  /**
+   * Get manufacturer by ID
+   * @param {string} manufacturerId - Manufacturer ID
+   * @returns {object|null} - Manufacturer data or null if not found
+   */
+  async getManufacturer(manufacturerId) {
+    return this.manufacturers.get(manufacturerId) || null;
+  }
+
+  /**
+   * Get manufacturer by name
+   * @param {string} name - Manufacturer name
+   * @returns {object|null} - Manufacturer data or null if not found
+   */
+  async getManufacturerByName(name) {
+    for (const [id, manufacturer] of this.manufacturers) {
+      if (manufacturer.name.toLowerCase() === name.toLowerCase()) {
+        return manufacturer;
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Update manufacturer
+   * @param {string} manufacturerId - Manufacturer ID
+   * @param {object} updates - Updates to apply
+   * @returns {object|null} - Updated manufacturer or null if not found
+   */
+  async updateManufacturer(manufacturerId, updates) {
+    const manufacturer = this.manufacturers.get(manufacturerId);
+    
+    if (!manufacturer) {
+      return null;
+    }
+    
+    Object.assign(manufacturer, updates);
+    manufacturer.updatedAt = new Date();
+    
+    this.manufacturers.set(manufacturerId, manufacturer);
+    return manufacturer;
+  }
+
+  /**
+   * Delete manufacturer
+   * @param {string} manufacturerId - Manufacturer ID
+   * @returns {boolean} - Success status
+   */
+  async deleteManufacturer(manufacturerId) {
+    if (!this.manufacturers.has(manufacturerId)) {
+      return false;
+    }
+    
+    this.manufacturers.delete(manufacturerId);
+    return true;
+  }
+
+  /**
+   * Get all manufacturers
+   * @param {object} options - Options for retrieval
+   * @returns {object} - Manufacturers data
+   */
+  async getManufacturers(options = {}) {
+    const { limit = 50, offset = 0, verified, search, sortBy = 'name', sortOrder = 'asc' } = options;
+    
+    let manufacturers = Array.from(this.manufacturers.values());
+    
+    // Apply verified filter
+    if (verified !== undefined) {
+      manufacturers = manufacturers.filter(m => m.verified === verified);
+    }
+    
+    // Apply search filter
+    if (search) {
+      const searchLower = search.toLowerCase();
+      manufacturers = manufacturers.filter(m => 
+        m.name.toLowerCase().includes(searchLower) ||
+        m.certifications.some(cert => cert.toLowerCase().includes(searchLower))
+      );
+    }
+    
+    // Apply sorting
+    manufacturers.sort((a, b) => {
+      let aValue = a[sortBy];
+      let bValue = b[sortBy];
+      
+      if (typeof aValue === 'string') {
+        aValue = aValue.toLowerCase();
+        bValue = bValue.toLowerCase();
+      }
+      
+      if (sortOrder === 'desc') {
+        [aValue, bValue] = [bValue, aValue];
+      }
+      
+      if (aValue < bValue) return -1;
+      if (aValue > bValue) return 1;
+      return 0;
     });
+    
+    // Apply pagination
+    const total = manufacturers.length;
+    manufacturers = manufacturers.slice(offset, offset + limit);
+    
+    return {
+      manufacturers,
+      pagination: {
+        total,
+        limit,
+        offset,
+        hasMore: offset + limit < total
+      }
+    };
   }
 
   /**
@@ -83,113 +155,121 @@ export class ManufacturerService {
    */
   async getManufacturerData(productId, clientId) {
     // In a real implementation, this would look up the manufacturer from the product
-    // For now, we'll return mock data based on the client
-    const manufacturerName = this.getManufacturerNameByClient(clientId);
-    const manufacturer = this.manufacturers.get(manufacturerName);
-
-    if (!manufacturer) {
-      return {
-        name: manufacturerName,
-        officialUrl: null,
-        certifications: [],
-        verified: false,
-        trustScore: 0
-      };
-    }
-
-    return manufacturer;
-  }
-
-  /**
-   * Get manufacturer name by client ID
-   * @param {string} clientId - Client ID
-   * @returns {string} - Manufacturer name
-   */
-  getManufacturerNameByClient(clientId) {
-    const clientManufacturers = {
-      'freshapples': 'Fresh Apples Orchard',
-      'techstore': 'Apple Inc.',
-      'bookstore': 'Scribner'
+    // For now, return basic manufacturer data
+    return {
+      name: 'Unknown Manufacturer',
+      officialUrl: null,
+      certifications: [],
+      verified: false,
+      trustScore: 0.8,
+      metadata: {
+        source: 'manufacturer_service',
+        clientId: clientId,
+        productId: productId
+      }
     };
-
-    return clientManufacturers[clientId] || 'Unknown Manufacturer';
   }
 
   /**
    * Verify manufacturer
-   * @param {string} manufacturerName - Manufacturer name
+   * @param {string} manufacturerId - Manufacturer ID
+   * @param {object} verificationData - Verification data
    * @returns {object} - Verification result
    */
-  async verifyManufacturer(manufacturerName) {
-    const manufacturer = this.manufacturers.get(manufacturerName);
+  async verifyManufacturer(manufacturerId, verificationData) {
+    const manufacturer = this.manufacturers.get(manufacturerId);
     
     if (!manufacturer) {
-      return {
-        verified: false,
-        trustScore: 0,
-        reason: 'Manufacturer not found in database'
-      };
+      throw new Error('Manufacturer not found');
     }
-
+    
+    const verification = {
+      verified: verificationData.verified || false,
+      verificationDate: new Date(),
+      verificationMethod: verificationData.method || 'manual',
+      verifier: verificationData.verifier || 'system',
+      notes: verificationData.notes || '',
+      trustScore: verificationData.trustScore || manufacturer.trustScore
+    };
+    
+    manufacturer.verified = verification.verified;
+    manufacturer.trustScore = verification.trustScore;
+    manufacturer.verification = verification;
+    manufacturer.updatedAt = new Date();
+    
+    this.manufacturers.set(manufacturerId, manufacturer);
+    
     return {
-      verified: manufacturer.verified,
-      trustScore: manufacturer.trustScore,
-      certifications: manufacturer.certifications,
-      reason: manufacturer.verified ? 'Verified manufacturer' : 'Unverified manufacturer'
+      manufacturer,
+      verification
     };
   }
 
   /**
-   * Get manufacturer certifications
-   * @param {string} manufacturerName - Manufacturer name
-   * @returns {array} - Certifications array
+   * Add certification to manufacturer
+   * @param {string} manufacturerId - Manufacturer ID
+   * @param {object} certification - Certification data
+   * @returns {object} - Updated manufacturer
    */
-  async getCertifications(manufacturerName) {
-    const manufacturer = this.manufacturers.get(manufacturerName);
-    return manufacturer?.certifications || [];
-  }
-
-  /**
-   * Get manufacturer trust score
-   * @param {string} manufacturerName - Manufacturer name
-   * @returns {number} - Trust score
-   */
-  async getTrustScore(manufacturerName) {
-    const manufacturer = this.manufacturers.get(manufacturerName);
-    return manufacturer?.trustScore || 0;
-  }
-
-  /**
-   * Search manufacturers
-   * @param {string} query - Search query
-   * @param {object} options - Search options
-   * @returns {array} - Search results
-   */
-  async searchManufacturers(query, options = {}) {
-    const { limit = 20, verified = null } = options;
+  async addCertification(manufacturerId, certification) {
+    const manufacturer = this.manufacturers.get(manufacturerId);
     
-    let results = Array.from(this.manufacturers.values());
-
-    // Filter by verification status if specified
-    if (verified !== null) {
-      results = results.filter(manufacturer => manufacturer.verified === verified);
+    if (!manufacturer) {
+      throw new Error('Manufacturer not found');
     }
+    
+    const newCertification = {
+      name: certification.name,
+      issuer: certification.issuer,
+      issueDate: certification.issueDate || new Date(),
+      expiryDate: certification.expiryDate,
+      verified: certification.verified || false,
+      certificateId: certification.certificateId
+    };
+    
+    manufacturer.certifications.push(newCertification);
+    manufacturer.updatedAt = new Date();
+    
+    this.manufacturers.set(manufacturerId, manufacturer);
+    return manufacturer;
+  }
 
-    // Apply search query
-    if (query) {
-      const queryLower = query.toLowerCase();
-      results = results.filter(manufacturer => 
-        manufacturer.name.toLowerCase().includes(queryLower) ||
-        manufacturer.certifications.some(cert => 
-          cert.toLowerCase().includes(queryLower)
-        )
-      );
+  /**
+   * Bulk import manufacturers
+   * @param {Array} manufacturersData - Array of manufacturer data
+   * @returns {object} - Import results
+   */
+  async bulkImportManufacturers(manufacturersData) {
+    const results = {
+      imported: 0,
+      updated: 0,
+      errors: [],
+      total: manufacturersData.length
+    };
+    
+    for (const manufacturerData of manufacturersData) {
+      try {
+        const manufacturerId = manufacturerData.id || `manufacturer-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        if (this.manufacturers.has(manufacturerId)) {
+          await this.updateManufacturer(manufacturerId, manufacturerData);
+          results.updated++;
+        } else {
+          this.createManufacturer({
+            ...manufacturerData,
+            id: manufacturerId
+          });
+          results.imported++;
+        }
+      } catch (error) {
+        results.errors.push({
+          manufacturer: manufacturerData.name || manufacturerData.id,
+          error: error.message
+        });
+      }
     }
-
-    // Sort by trust score
-    results.sort((a, b) => b.trustScore - a.trustScore);
-
-    return results.slice(0, limit);
+    
+    return results;
   }
 
   /**
@@ -199,23 +279,26 @@ export class ManufacturerService {
   async getManufacturerStats() {
     const manufacturers = Array.from(this.manufacturers.values());
     
-    const total = manufacturers.length;
-    const verified = manufacturers.filter(m => m.verified).length;
-    const averageTrustScore = manufacturers.reduce((sum, m) => sum + m.trustScore, 0) / total;
-
-    const certificationStats = {};
-    manufacturers.forEach(manufacturer => {
-      manufacturer.certifications.forEach(cert => {
-        certificationStats[cert] = (certificationStats[cert] || 0) + 1;
+    const totalManufacturers = manufacturers.length;
+    const verifiedManufacturers = manufacturers.filter(m => m.verified).length;
+    const averageTrustScore = manufacturers.length > 0 ? 
+      manufacturers.reduce((sum, m) => sum + m.trustScore, 0) / manufacturers.length : 0;
+    
+    const certifications = manufacturers.reduce((acc, m) => {
+      m.certifications.forEach(cert => {
+        acc[cert.name] = (acc[cert.name] || 0) + 1;
       });
-    });
-
+      return acc;
+    }, {});
+    
     return {
-      total,
-      verified,
-      verificationRate: verified / total,
+      totalManufacturers,
+      verifiedManufacturers,
       averageTrustScore,
-      certificationStats
+      topCertifications: Object.entries(certifications)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5)
+        .map(([name, count]) => ({ name, count }))
     };
   }
 }

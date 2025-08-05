@@ -56,7 +56,7 @@ export class DataIngestionService {
           results.categories++;
         }
 
-        // Generate mock trust data (in real implementation, this would come from external sources)
+        // Generate trust data (in real implementation, this would come from external sources)
         const trustData = this.generateTrustData(transformedProduct.id, clientId);
         await this.trustService.createTrustData(trustData);
         results.trustData++;
@@ -189,22 +189,24 @@ export class DataIngestionService {
   }
 
   /**
-   * Generate mock trust data for a product
+   * Generate trust data for a product
+   * In a real implementation, this would integrate with external trust services
    */
   generateTrustData(productId, clientId) {
     return {
       id: `${productId}-trust-${Date.now()}`,
       productId: productId,
       clientId: clientId,
-      type: 'review',
-      source: 'generated',
-      value: 'Great product with excellent quality',
+      type: 'initial',
+      source: 'data_ingestion',
+      value: 'Product data ingested successfully',
       credibility: 0.85,
       date: new Date(),
       verified: false,
       metadata: {
-        source: 'mock_data',
-        clientId: clientId
+        source: 'data_ingestion_service',
+        clientId: clientId,
+        ingestionMethod: 'shopify'
       }
     };
   }
@@ -213,12 +215,163 @@ export class DataIngestionService {
    * Ingest data from other e-commerce platforms
    */
   async ingestWooCommerceData(wooCommerceProducts, clientId) {
-    // Similar implementation for WooCommerce
-    // This would transform WooCommerce product format to our knowledge graph
+    const results = {
+      products: 0,
+      manufacturers: 0,
+      categories: 0,
+      trustData: 0,
+      errors: []
+    };
+
+    try {
+      for (const wooProduct of wooCommerceProducts) {
+        // Transform WooCommerce product to our knowledge graph format
+        const transformedProduct = this.transformWooCommerceProduct(wooProduct, clientId);
+        
+        // Store in our system
+        await this.productService.createProduct(transformedProduct);
+        results.products++;
+
+        // Extract and store manufacturer data
+        if (wooProduct.manufacturer) {
+          const manufacturer = this.extractManufacturerData(wooProduct.manufacturer, clientId);
+          await this.manufacturerService.createManufacturer(manufacturer);
+          results.manufacturers++;
+        }
+
+        // Extract and store category data
+        if (wooProduct.category) {
+          const category = this.extractCategoryData(wooProduct.category, clientId);
+          await this.categoryService.createCategory(category);
+          results.categories++;
+        }
+
+        // Generate trust data
+        const trustData = this.generateTrustData(transformedProduct.id, clientId);
+        await this.trustService.createTrustData(trustData);
+        results.trustData++;
+      }
+    } catch (error) {
+      results.errors.push(error.message);
+    }
+
+    return results;
+  }
+
+  /**
+   * Transform WooCommerce product to our knowledge graph format
+   */
+  transformWooCommerceProduct(wooProduct, clientId) {
+    const productId = `${clientId}-${wooProduct.sku || wooProduct.id}`;
+    
+    return {
+      id: productId,
+      clientId: clientId,
+      name: wooProduct.name,
+      description: wooProduct.description || '',
+      category: wooProduct.category || 'general',
+      price: parseFloat(wooProduct.price) || 0,
+      currency: wooProduct.currency || 'USD',
+      availability: wooProduct.stock_status === 'instock',
+      manufacturer: wooProduct.manufacturer || 'Unknown',
+      model: wooProduct.sku || wooProduct.id,
+      specifications: {
+        weight: wooProduct.weight,
+        dimensions: wooProduct.dimensions,
+        sku: wooProduct.sku
+      },
+      images: wooProduct.images || [],
+      tags: wooProduct.tags || [],
+      trustScore: 0.85,
+      createdAt: new Date(wooProduct.date_created),
+      updatedAt: new Date(wooProduct.date_modified),
+      metadata: {
+        wooCommerceId: wooProduct.id,
+        sku: wooProduct.sku,
+        stockStatus: wooProduct.stock_status,
+        clientId: clientId
+      }
+    };
   }
 
   async ingestMagentoData(magentoProducts, clientId) {
     // Similar implementation for Magento
     // This would transform Magento product format to our knowledge graph
+    const results = {
+      products: 0,
+      manufacturers: 0,
+      categories: 0,
+      trustData: 0,
+      errors: []
+    };
+
+    try {
+      for (const magentoProduct of magentoProducts) {
+        // Transform Magento product to our knowledge graph format
+        const transformedProduct = this.transformMagentoProduct(magentoProduct, clientId);
+        
+        // Store in our system
+        await this.productService.createProduct(transformedProduct);
+        results.products++;
+
+        // Extract and store manufacturer data
+        if (magentoProduct.manufacturer) {
+          const manufacturer = this.extractManufacturerData(magentoProduct.manufacturer, clientId);
+          await this.manufacturerService.createManufacturer(manufacturer);
+          results.manufacturers++;
+        }
+
+        // Extract and store category data
+        if (magentoProduct.category) {
+          const category = this.extractCategoryData(magentoProduct.category, clientId);
+          await this.categoryService.createCategory(category);
+          results.categories++;
+        }
+
+        // Generate trust data
+        const trustData = this.generateTrustData(transformedProduct.id, clientId);
+        await this.trustService.createTrustData(trustData);
+        results.trustData++;
+      }
+    } catch (error) {
+      results.errors.push(error.message);
+    }
+
+    return results;
+  }
+
+  /**
+   * Transform Magento product to our knowledge graph format
+   */
+  transformMagentoProduct(magentoProduct, clientId) {
+    const productId = `${clientId}-${magentoProduct.sku || magentoProduct.id}`;
+    
+    return {
+      id: productId,
+      clientId: clientId,
+      name: magentoProduct.name,
+      description: magentoProduct.description || '',
+      category: magentoProduct.category || 'general',
+      price: parseFloat(magentoProduct.price) || 0,
+      currency: magentoProduct.currency || 'USD',
+      availability: magentoProduct.status === 'enabled',
+      manufacturer: magentoProduct.manufacturer || 'Unknown',
+      model: magentoProduct.sku || magentoProduct.id,
+      specifications: {
+        weight: magentoProduct.weight,
+        sku: magentoProduct.sku
+      },
+      images: magentoProduct.images || [],
+      tags: magentoProduct.tags || [],
+      trustScore: 0.85,
+      createdAt: new Date(magentoProduct.created_at),
+      updatedAt: new Date(magentoProduct.updated_at),
+      metadata: {
+        magentoId: magentoProduct.id,
+        sku: magentoProduct.sku,
+        status: magentoProduct.status,
+        clientId: clientId
+      }
+    };
   }
 } 

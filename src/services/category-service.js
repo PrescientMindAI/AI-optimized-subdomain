@@ -1,127 +1,39 @@
 /**
  * Category Service
  * 
- * Handles category hierarchies and relationships for the AI-optimized subdomain system.
+ * Manages category data and operations for the AI-optimized subdomain system.
  */
 
 export class CategoryService {
   constructor() {
-    // Initialize mock category data
+    // Initialize with empty category storage - categories will be added dynamically
     this.categories = new Map();
-    this.initializeMockCategories();
   }
 
   /**
-   * Initialize mock category data
+   * Create a new category
+   * @param {object} categoryData - Category data
+   * @returns {object} - Created category object
    */
-  initializeMockCategories() {
-    const mockCategories = [
-      // Fresh Apples categories
-      {
-        id: 'fruits',
-        clientId: 'freshapples',
-        name: 'Fruits',
-        description: 'Fresh fruits and berries',
-        level: 1,
-        parentId: null,
-        productCount: 3,
-        averagePrice: 5.09,
-        averageTrustScore: 0.89,
-        tags: ['fresh', 'organic', 'seasonal']
-      },
-      {
-        id: 'vegetables',
-        clientId: 'freshapples',
-        name: 'Vegetables',
-        description: 'Fresh vegetables and greens',
-        level: 1,
-        parentId: null,
-        productCount: 0,
-        averagePrice: 0,
-        averageTrustScore: 0,
-        tags: ['fresh', 'organic', 'local']
-      },
-      {
-        id: 'apples',
-        clientId: 'freshapples',
-        name: 'Apples',
-        description: 'Fresh apples in various varieties',
-        level: 2,
-        parentId: 'fruits',
-        productCount: 3,
-        averagePrice: 5.09,
-        averageTrustScore: 0.89,
-        tags: ['sweet', 'crisp', 'baking']
-      },
+  createCategory(categoryData) {
+    const category = {
+      id: categoryData.id,
+      clientId: categoryData.clientId,
+      name: categoryData.name,
+      description: categoryData.description || '',
+      level: categoryData.level || 1,
+      parentId: categoryData.parentId || null,
+      productCount: categoryData.productCount || 0,
+      averagePrice: categoryData.averagePrice || 0,
+      averageTrustScore: categoryData.averageTrustScore || 0,
+      tags: categoryData.tags || [],
+      createdAt: categoryData.createdAt || new Date(),
+      updatedAt: new Date(),
+      metadata: categoryData.metadata || {}
+    };
 
-      // Tech Store categories
-      {
-        id: 'computers',
-        clientId: 'techstore',
-        name: 'Computers',
-        description: 'Laptops, desktops, and accessories',
-        level: 1,
-        parentId: null,
-        productCount: 1,
-        averagePrice: 1999.99,
-        averageTrustScore: 0.95,
-        tags: ['professional', 'gaming', 'business']
-      },
-      {
-        id: 'phones',
-        clientId: 'techstore',
-        name: 'Phones',
-        description: 'Smartphones and mobile devices',
-        level: 1,
-        parentId: null,
-        productCount: 1,
-        averagePrice: 999.99,
-        averageTrustScore: 0.93,
-        tags: ['mobile', 'camera', '5g']
-      },
-      {
-        id: 'laptops',
-        clientId: 'techstore',
-        name: 'Laptops',
-        description: 'Portable computers and notebooks',
-        level: 2,
-        parentId: 'computers',
-        productCount: 1,
-        averagePrice: 1999.99,
-        averageTrustScore: 0.95,
-        tags: ['portable', 'professional', 'creative']
-      },
-
-      // Bookstore categories
-      {
-        id: 'books',
-        clientId: 'bookstore',
-        name: 'Books',
-        description: 'Books in various formats',
-        level: 1,
-        parentId: null,
-        productCount: 1,
-        averagePrice: 12.99,
-        averageTrustScore: 0.91,
-        tags: ['reading', 'knowledge', 'entertainment']
-      },
-      {
-        id: 'fiction',
-        clientId: 'bookstore',
-        name: 'Fiction',
-        description: 'Fiction books and novels',
-        level: 2,
-        parentId: 'books',
-        productCount: 1,
-        averagePrice: 12.99,
-        averageTrustScore: 0.91,
-        tags: ['stories', 'imagination', 'classics']
-      }
-    ];
-
-    mockCategories.forEach(category => {
-      this.categories.set(category.id, category);
-    });
+    this.categories.set(category.id, category);
+    return category;
   }
 
   /**
@@ -131,49 +43,123 @@ export class CategoryService {
    * @returns {object} - Categories data
    */
   async getCategories(clientId, options = {}) {
-    const { parentId, level, includeProducts, includeStats } = options;
-
-    // Filter categories by client
-    let categories = Array.from(this.categories.values())
-      .filter(category => category.clientId === clientId);
-
-    // Filter by parent ID if specified
-    if (parentId) {
-      categories = categories.filter(category => category.parentId === parentId);
-    }
-
-    // Filter by level if specified
+    const { level, parentId, includeStats = false } = options;
+    
+    let categories = Array.from(this.categories.values()).filter(category => category.clientId === clientId);
+    
+    // Apply level filter
     if (level !== undefined) {
       categories = categories.filter(category => category.level === level);
     }
-
-    // Include products if requested
-    if (includeProducts) {
-      categories = categories.map(category => ({
-        ...category,
-        products: this.getProductsForCategory(category.id, clientId)
-      }));
+    
+    // Apply parent filter
+    if (parentId !== undefined) {
+      categories = categories.filter(category => category.parentId === parentId);
     }
-
-    // Include stats if requested
+    
+    // Sort by level, then by name
+    categories.sort((a, b) => {
+      if (a.level !== b.level) return a.level - b.level;
+      return a.name.localeCompare(b.name);
+    });
+    
+    // Include statistics if requested
     if (includeStats) {
       categories = categories.map(category => ({
         ...category,
-        stats: this.getCategoryStats(category.id, clientId)
+        stats: this.calculateCategoryStats(category.id, clientId)
       }));
     }
-
-    // Build hierarchy if no specific parent is requested
-    if (!parentId) {
-      return {
-        categories,
-        hierarchy: this.buildHierarchy(categories)
-      };
-    }
-
+    
     return {
-      categories
+      categories,
+      total: categories.length,
+      levels: [...new Set(categories.map(c => c.level))].sort()
     };
+  }
+
+  /**
+   * Get category by ID
+   * @param {string} categoryId - Category ID
+   * @param {string} clientId - Client ID for isolation
+   * @returns {object|null} - Category data or null if not found
+   */
+  async getCategory(categoryId, clientId) {
+    const category = this.categories.get(categoryId);
+    
+    if (!category || category.clientId !== clientId) {
+      return null;
+    }
+    
+    return category;
+  }
+
+  /**
+   * Update category
+   * @param {string} categoryId - Category ID
+   * @param {object} updates - Updates to apply
+   * @param {string} clientId - Client ID for isolation
+   * @returns {object|null} - Updated category or null if not found
+   */
+  async updateCategory(categoryId, updates, clientId) {
+    const category = this.categories.get(categoryId);
+    
+    if (!category || category.clientId !== clientId) {
+      return null;
+    }
+    
+    Object.assign(category, updates);
+    category.updatedAt = new Date();
+    
+    this.categories.set(categoryId, category);
+    return category;
+  }
+
+  /**
+   * Delete category
+   * @param {string} categoryId - Category ID
+   * @param {string} clientId - Client ID for isolation
+   * @returns {boolean} - Success status
+   */
+  async deleteCategory(categoryId, clientId) {
+    const category = this.categories.get(categoryId);
+    
+    if (!category || category.clientId !== clientId) {
+      return false;
+    }
+    
+    // Check if category has children
+    const hasChildren = Array.from(this.categories.values()).some(c => 
+      c.clientId === clientId && c.parentId === categoryId
+    );
+    
+    if (hasChildren) {
+      throw new Error('Cannot delete category with subcategories');
+    }
+    
+    this.categories.delete(categoryId);
+    return true;
+  }
+
+  /**
+   * Get category hierarchy
+   * @param {string} clientId - Client ID
+   * @returns {object} - Category hierarchy
+   */
+  async getCategoryHierarchy(clientId) {
+    const categories = Array.from(this.categories.values()).filter(c => c.clientId === clientId);
+    
+    const buildHierarchy = (parentId = null) => {
+      return categories
+        .filter(c => c.parentId === parentId)
+        .map(category => ({
+          ...category,
+          children: buildHierarchy(category.id)
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+    };
+    
+    return buildHierarchy();
   }
 
   /**
@@ -183,180 +169,127 @@ export class CategoryService {
    * @returns {array} - Products array
    */
   getProductsForCategory(categoryId, clientId) {
-    // Mock product data - in real implementation, this would query the product service
-    const categoryProducts = {
-      'fruits': [
-        { id: 'apple-gala-001', name: 'Gala Apples', price: 4.99 },
-        { id: 'apple-fuji-002', name: 'Fuji Apples', price: 5.49 },
-        { id: 'apple-granny-003', name: 'Granny Smith Apples', price: 4.79 }
-      ],
-      'apples': [
-        { id: 'apple-gala-001', name: 'Gala Apples', price: 4.99 },
-        { id: 'apple-fuji-002', name: 'Fuji Apples', price: 5.49 },
-        { id: 'apple-granny-003', name: 'Granny Smith Apples', price: 4.79 }
-      ],
-      'computers': [
-        { id: 'laptop-macbook-001', name: 'MacBook Pro 14-inch', price: 1999.99 }
-      ],
-      'laptops': [
-        { id: 'laptop-macbook-001', name: 'MacBook Pro 14-inch', price: 1999.99 }
-      ],
-      'phones': [
-        { id: 'phone-iphone-001', name: 'iPhone 15 Pro', price: 999.99 }
-      ],
-      'books': [
-        { id: 'book-fiction-001', name: 'The Great Gatsby', price: 12.99 }
-      ],
-      'fiction': [
-        { id: 'book-fiction-001', name: 'The Great Gatsby', price: 12.99 }
-      ]
-    };
-
-    return categoryProducts[categoryId] || [];
+    // In a real implementation, this would query the product service
+    // For now, return empty array - products will be managed by product service
+    return [];
   }
 
   /**
-   * Get category statistics
+   * Calculate category statistics
    * @param {string} categoryId - Category ID
    * @param {string} clientId - Client ID
    * @returns {object} - Category statistics
    */
-  getCategoryStats(categoryId, clientId) {
+  calculateCategoryStats(categoryId, clientId) {
     const category = this.categories.get(categoryId);
     if (!category || category.clientId !== clientId) {
-      return {
-        productCount: 0,
-        averagePrice: 0,
-        averageTrustScore: 0,
-        subcategories: 0
-      };
+      return null;
     }
-
-    // Count subcategories
-    const subcategories = Array.from(this.categories.values())
-      .filter(cat => cat.parentId === categoryId && cat.clientId === clientId)
-      .length;
-
+    
+    // Get all subcategories
+    const subcategories = Array.from(this.categories.values()).filter(c => 
+      c.clientId === clientId && this.isDescendant(c.id, categoryId, clientId)
+    );
+    
     return {
-      productCount: category.productCount,
+      totalCategories: subcategories.length + 1,
+      totalProducts: category.productCount,
       averagePrice: category.averagePrice,
       averageTrustScore: category.averageTrustScore,
-      subcategories
+      level: category.level,
+      hasChildren: subcategories.length > 0
     };
   }
 
   /**
-   * Build category hierarchy
-   * @param {array} categories - Categories array
-   * @returns {object} - Hierarchy tree
-   */
-  buildHierarchy(categories) {
-    const hierarchy = {};
-    const categoryMap = new Map();
-
-    // Create a map for easy lookup
-    categories.forEach(category => {
-      categoryMap.set(category.id, { ...category, children: [] });
-    });
-
-    // Build the tree
-    categories.forEach(category => {
-      if (category.parentId) {
-        const parent = categoryMap.get(category.parentId);
-        if (parent) {
-          parent.children.push(categoryMap.get(category.id));
-        }
-      } else {
-        hierarchy[category.id] = categoryMap.get(category.id);
-      }
-    });
-
-    return hierarchy;
-  }
-
-  /**
-   * Get category by ID
-   * @param {string} categoryId - Category ID
+   * Check if a category is a descendant of another
+   * @param {string} categoryId - Category ID to check
+   * @param {string} ancestorId - Ancestor category ID
    * @param {string} clientId - Client ID
-   * @returns {object|null} - Category data or null
+   * @returns {boolean} - Whether category is descendant
    */
-  async getCategory(categoryId, clientId) {
+  isDescendant(categoryId, ancestorId, clientId) {
     const category = this.categories.get(categoryId);
-    
     if (!category || category.clientId !== clientId) {
-      return null;
+      return false;
     }
-
-    return category;
+    
+    if (category.parentId === ancestorId) {
+      return true;
+    }
+    
+    if (category.parentId) {
+      return this.isDescendant(category.parentId, ancestorId, clientId);
+    }
+    
+    return false;
   }
 
   /**
-   * Get category path (breadcrumb)
-   * @param {string} categoryId - Category ID
+   * Bulk import categories
+   * @param {Array} categoriesData - Array of category data
    * @param {string} clientId - Client ID
-   * @returns {array} - Category path
+   * @returns {object} - Import results
    */
-  async getCategoryPath(categoryId, clientId) {
-    const path = [];
-    let currentCategory = this.categories.get(categoryId);
-
-    while (currentCategory && currentCategory.clientId === clientId) {
-      path.unshift(currentCategory);
-      currentCategory = currentCategory.parentId ? 
-        this.categories.get(currentCategory.parentId) : null;
+  async bulkImportCategories(categoriesData, clientId) {
+    const results = {
+      imported: 0,
+      updated: 0,
+      errors: [],
+      total: categoriesData.length
+    };
+    
+    for (const categoryData of categoriesData) {
+      try {
+        const categoryId = categoryData.id || `${clientId}-category-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        if (this.categories.has(categoryId)) {
+          await this.updateCategory(categoryId, categoryData, clientId);
+          results.updated++;
+        } else {
+          this.createCategory({
+            ...categoryData,
+            id: categoryId,
+            clientId
+          });
+          results.imported++;
+        }
+      } catch (error) {
+        results.errors.push({
+          category: categoryData.name || categoryData.id,
+          error: error.message
+        });
+      }
     }
-
-    return path;
+    
+    return results;
   }
 
   /**
-   * Search categories
-   * @param {string} query - Search query
+   * Get category statistics
    * @param {string} clientId - Client ID
-   * @param {object} options - Search options
-   * @returns {array} - Search results
+   * @returns {object} - Category statistics
    */
-  async searchCategories(query, clientId, options = {}) {
-    const { limit = 20, level = null } = options;
-
-    let categories = Array.from(this.categories.values())
-      .filter(category => category.clientId === clientId);
-
-    // Filter by level if specified
-    if (level !== null) {
-      categories = categories.filter(category => category.level === level);
-    }
-
-    // Apply search query
-    if (query) {
-      const queryLower = query.toLowerCase();
-      categories = categories.filter(category => 
-        category.name.toLowerCase().includes(queryLower) ||
-        category.description.toLowerCase().includes(queryLower) ||
-        category.tags.some(tag => tag.toLowerCase().includes(queryLower))
-      );
-    }
-
-    // Sort by relevance (mock implementation)
-    categories.sort((a, b) => b.productCount - a.productCount);
-
-    return categories.slice(0, limit);
-  }
-
-  /**
-   * Get category suggestions
-   * @param {string} query - Search query
-   * @param {string} clientId - Client ID
-   * @returns {array} - Category suggestions
-   */
-  async getCategorySuggestions(query, clientId) {
-    const categories = await this.searchCategories(query, clientId, { limit: 5 });
-    return categories.map(category => ({
-      id: category.id,
-      name: category.name,
-      description: category.description,
-      level: category.level
-    }));
+  async getCategoryStats(clientId) {
+    const categories = Array.from(this.categories.values()).filter(c => c.clientId === clientId);
+    
+    const totalCategories = categories.length;
+    const levels = [...new Set(categories.map(c => c.level))];
+    const averageProducts = categories.length > 0 ? 
+      categories.reduce((sum, c) => sum + c.productCount, 0) / categories.length : 0;
+    const averageTrustScore = categories.length > 0 ? 
+      categories.reduce((sum, c) => sum + c.averageTrustScore, 0) / categories.length : 0;
+    
+    return {
+      totalCategories,
+      levels: levels.sort(),
+      averageProducts,
+      averageTrustScore,
+      topCategories: categories
+        .sort((a, b) => b.productCount - a.productCount)
+        .slice(0, 5)
+        .map(c => ({ id: c.id, name: c.name, productCount: c.productCount }))
+    };
   }
 }
 

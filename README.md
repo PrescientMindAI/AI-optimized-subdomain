@@ -127,7 +127,7 @@ ai.domain.xyz/
 - `GET /manufacturers/{product_id}` - Official manufacturer information
 
 ### Future Broader Access
-- **AllioIA.io**: Planned broader access to the complete knowledge graph across all clients
+- **AllioIA.io**: Planned broader access to the complete knowledge graph across all clients for LLM training or AI Shopping Assistants app. 
 - **Cross-client insights**: Market analysis and comparative data (with appropriate permissions)
 
 ## Use Cases
@@ -139,7 +139,7 @@ AI agents can efficiently access client-scoped data to:
 - Understand product relationships, compatibility, and customer experiences
 - Make recommendations based on integrated reviews and manufacturer data
 - Access semantic search scoped to the specific e-commerce domain
-- **Enhanced with RefKG**: 40-60% better query interpretation and 30-50% improved result quality
+- **Enhanced with RefKG**: for better query interpretation and improved result quality
 - **Enhanced with I40KG**: Quality certifications and supply chain transparency
 - **Enhanced with DPP**: Authenticity verification and EU regulatory compliance
 
@@ -195,7 +195,7 @@ This will test:
 
 ### **Our Vision**
 - **AI-First Data Standards**: Creating data formats optimized for AI consumption
-- **Enhanced LLM Performance**: 40-60% better query understanding and 60-70% token reduction
+- **Enhanced LLM Performance**: better query understanding and token reduction
 - **Trust Integration**: Quality certifications, authenticity verification, and regulatory compliance
 - **Client Isolation**: Secure, scoped data access for each e-commerce client
 - **Industry Standards**: Establishing universal protocols for AI-e-commerce interaction
