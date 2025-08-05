@@ -1,92 +1,77 @@
 /**
- * Enhanced AI Controller
+ * Enhanced AI Controller - Reference Implementation
  * 
- * Integrates RefKG, I40KG, and DPP standards to provide superior data
- * for LLMs compared to regular e-commerce websites. This controller
- * implements the generative engine optimization (GEO) approach.
+ * Demonstrates implementation of RefKG, I40KG, and DPP standards
+ * for AI-enhanced knowledge graphs. This is a reference implementation
+ * showing how to integrate the three standards.
  */
 
 import express from 'express';
 import { RefKGEnhancedSearchService } from '../services/refkg-enhanced-search-service.js';
 import { I40KGQualityService } from '../services/i40kg-quality-service.js';
 import { DPPIdentityService } from '../services/dpp-identity-service.js';
-import { ProductService } from '../services/product-service.js';
-import { SearchService } from '../services/search-service.js';
-import { TrustService } from '../services/trust-service.js';
-import { ManufacturerService } from '../services/manufacturer-service.js';
 
 export class EnhancedAIController {
   constructor() {
     this.router = express.Router();
     
-    // Initialize enhanced services
+    // Initialize the three standards services
     this.refkgService = new RefKGEnhancedSearchService();
     this.i40kgService = new I40KGQualityService();
     this.dppService = new DPPIdentityService();
-    
-    // Initialize base services
-    this.productService = new ProductService();
-    this.searchService = new SearchService();
-    this.trustService = new TrustService();
-    this.manufacturerService = new ManufacturerService();
     
     this.setupRoutes();
   }
 
   setupRoutes() {
-    // Enhanced search endpoints
-    this.router.post('/search/enhanced', this.enhancedSearch.bind(this));
+    // RefKG (Reflective Knowledge Graph) endpoints
     this.router.post('/search/refkg', this.refkgSearch.bind(this));
     this.router.post('/search/decompose', this.decomposeQuery.bind(this));
     
-    // Product enhancement endpoints
-    this.router.get('/products/:id/enhanced', this.getEnhancedProduct.bind(this));
-    this.router.get('/products/:id/quality', this.getProductQuality.bind(this));
-    this.router.get('/products/:id/dpp', this.getProductDPP.bind(this));
-    this.router.get('/products/:id/authenticity', this.verifyProductAuthenticity.bind(this));
+    // I40KG (Industry 4.0 Knowledge Graph) endpoints
+    this.router.get('/entities/:id/quality', this.getEntityQuality.bind(this));
+    this.router.get('/entities/:id/certifications', this.getEntityCertifications.bind(this));
     
-    // Trust and compliance endpoints
-    this.router.get('/trust/:productId/enhanced', this.getEnhancedTrust.bind(this));
-    this.router.get('/compliance/:productId', this.getProductCompliance.bind(this));
+    // DPP (Digital Product Passport) endpoints
+    this.router.get('/entities/:id/dpp', this.getEntityDPP.bind(this));
+    this.router.get('/entities/:id/authenticity', this.verifyEntityAuthenticity.bind(this));
+    
+    // Combined enhanced endpoints
+    this.router.post('/search/enhanced', this.enhancedSearch.bind(this));
+    this.router.get('/entities/:id/enhanced', this.getEnhancedEntity.bind(this));
     
     // LLM-optimized endpoints
     this.router.post('/llm/search', this.llmOptimizedSearch.bind(this));
-    this.router.get('/llm/product/:id', this.getLLMOptimizedProduct.bind(this));
-    this.router.post('/llm/recommendations', this.getLLMRecommendations.bind(this));
+    this.router.get('/llm/entity/:id', this.getLLMOptimizedEntity.bind(this));
     
-    // Demo endpoints (no authentication required)
-    this.router.get('/demo/health', this.demoHealth.bind(this));
-    this.router.post('/demo/search', this.demoSearch.bind(this));
+    // AllioIA.io integration endpoints
+    this.router.post('/allioia/contribute', this.contributeToAllioIA.bind(this));
+    this.router.get('/allioia/status', this.getAllioIAStatus.bind(this));
   }
 
   /**
-   * Enhanced search combining all three standards
+   * RefKG: Enhanced search with query decomposition
+   * Demonstrates Reflective Knowledge Graph implementation
    */
-  async enhancedSearch(req, res) {
+  async refkgSearch(req, res) {
     try {
-      const { query, clientId, options = {} } = req.body;
+      const { query, options = {} } = req.body;
       
-      if (!query || !clientId) {
+      if (!query) {
         return res.status(400).json({
           success: false,
-          error: 'Query and clientId are required'
+          error: 'Query is required'
         });
       }
 
-      // Step 1: RefKG Query Decomposition
-      const decomposedQueries = await this.refkgService.decomposeQuery(query, clientId);
+      // Step 1: Query Decomposition
+      const decomposedQueries = await this.refkgService.decomposeQuery(query);
       
-      // Step 2: RefKG Evidence Exploration
-      const evidenceSubgraphs = await this.refkgService.exploreSubgraphs(decomposedQueries, clientId, options);
+      // Step 2: Evidence Exploration
+      const evidenceSubgraphs = await this.refkgService.exploreSubgraphs(decomposedQueries, options);
       
-      // Step 3: RefKG Knowledge Reconstruction
-      const reconstructedKnowledge = await this.refkgService.reconstructKnowledge(evidenceSubgraphs, query, clientId);
-      
-      // Step 4: Enhance with I40KG quality data
-      const enhancedResults = await this.enhanceWithI40KG(reconstructedKnowledge, clientId);
-      
-      // Step 5: Enhance with DPP authenticity data
-      const finalResults = await this.enhanceWithDPP(enhancedResults, clientId);
+      // Step 3: Knowledge Reconstruction
+      const reconstructedKnowledge = await this.refkgService.reconstructKnowledge(evidenceSubgraphs, query);
       
       res.json({
         success: true,
@@ -95,36 +80,11 @@ export class EnhancedAIController {
           decomposed_queries: decomposedQueries,
           evidence_subgraphs: evidenceSubgraphs,
           reconstructed_knowledge: reconstructedKnowledge,
-          enhanced_results: finalResults,
-          processing_metadata: {
-            standards_used: ['RefKG', 'I40KG', 'DPP'],
-            processing_time: Date.now() - req.startTime,
-            quality_score: this.calculateOverallQualityScore(finalResults)
+          metadata: {
+            standard: 'RefKG',
+            processing_time: Date.now() - req.startTime
           }
         }
-      });
-      
-    } catch (error) {
-      console.error('Enhanced search error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Enhanced search failed'
-      });
-    }
-  }
-
-  /**
-   * RefKG-specific search
-   */
-  async refkgSearch(req, res) {
-    try {
-      const { query, clientId, options = {} } = req.body;
-      
-      const results = await this.refkgService.refkgSearch(query, clientId, options);
-      
-      res.json({
-        success: true,
-        data: results
       });
       
     } catch (error) {
@@ -137,13 +97,13 @@ export class EnhancedAIController {
   }
 
   /**
-   * Query decomposition endpoint
+   * RefKG: Query decomposition endpoint
    */
   async decomposeQuery(req, res) {
     try {
-      const { query, clientId } = req.body;
+      const { query } = req.body;
       
-      const decomposedQueries = await this.refkgService.decomposeQuery(query, clientId);
+      const decomposedQueries = await this.refkgService.decomposeQuery(query);
       
       res.json({
         success: true,
@@ -163,233 +123,220 @@ export class EnhancedAIController {
   }
 
   /**
-   * Get enhanced product with all standards
+   * I40KG: Get entity quality data
+   * Demonstrates Industry 4.0 Knowledge Graph implementation
    */
-  async getEnhancedProduct(req, res) {
+  async getEntityQuality(req, res) {
     try {
       const { id } = req.params;
-      const { clientId } = req.query;
       
-      // Get base product data
-      const product = await this.productService.getProduct(id);
-      if (!product) {
-        return res.status(404).json({
+      const qualityData = await this.i40kgService.integrateCertificationData(id);
+      
+      res.json({
+        success: true,
+        data: {
+          entity_id: id,
+          quality_data: qualityData,
+          metadata: {
+            standard: 'I40KG',
+            certifications_count: qualityData.certifications?.length || 0
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('Entity quality error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Entity quality retrieval failed'
+      });
+    }
+  }
+
+  /**
+   * I40KG: Get entity certifications
+   */
+  async getEntityCertifications(req, res) {
+    try {
+      const { id } = req.params;
+      
+      const certifications = await this.i40kgService.getCertifications(id);
+      
+      res.json({
+        success: true,
+        data: {
+          entity_id: id,
+          certifications: certifications
+        }
+      });
+      
+    } catch (error) {
+      console.error('Entity certifications error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Entity certifications retrieval failed'
+      });
+    }
+  }
+
+  /**
+   * DPP: Get entity DPP data
+   * Demonstrates Digital Product Passport implementation
+   */
+  async getEntityDPP(req, res) {
+    try {
+      const { id } = req.params;
+      
+      const dppData = await this.dppService.generateDPPIdentity(id);
+      
+      res.json({
+        success: true,
+        data: {
+          entity_id: id,
+          dpp_data: dppData,
+          metadata: {
+            standard: 'DPP',
+            eu_compliant: dppData.eu_dpp_compliant || false
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('Entity DPP error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Entity DPP retrieval failed'
+      });
+    }
+  }
+
+  /**
+   * DPP: Verify entity authenticity
+   */
+  async verifyEntityAuthenticity(req, res) {
+    try {
+      const { id } = req.params;
+      
+      const authenticityData = await this.dppService.verifyProductAuthenticity(id);
+      
+      res.json({
+        success: true,
+        data: {
+          entity_id: id,
+          authenticity_data: authenticityData
+        }
+      });
+      
+    } catch (error) {
+      console.error('Entity authenticity error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Entity authenticity verification failed'
+      });
+    }
+  }
+
+  /**
+   * Enhanced search combining all three standards
+   */
+  async enhancedSearch(req, res) {
+    try {
+      const { query, options = {} } = req.body;
+      
+      if (!query) {
+        return res.status(400).json({
           success: false,
-          error: 'Product not found'
+          error: 'Query is required'
         });
       }
+
+      // Step 1: RefKG Query Decomposition
+      const decomposedQueries = await this.refkgService.decomposeQuery(query);
+      
+      // Step 2: RefKG Evidence Exploration
+      const evidenceSubgraphs = await this.refkgService.exploreSubgraphs(decomposedQueries, options);
+      
+      // Step 3: RefKG Knowledge Reconstruction
+      const reconstructedKnowledge = await this.refkgService.reconstructKnowledge(evidenceSubgraphs, query);
+      
+      // Step 4: Enhance with I40KG quality data
+      const enhancedResults = await this.enhanceWithI40KG(reconstructedKnowledge);
+      
+      // Step 5: Enhance with DPP authenticity data
+      const finalResults = await this.enhanceWithDPP(enhancedResults);
+      
+      res.json({
+        success: true,
+        data: {
+          original_query: query,
+          decomposed_queries: decomposedQueries,
+          evidence_subgraphs: evidenceSubgraphs,
+          reconstructed_knowledge: reconstructedKnowledge,
+          enhanced_results: finalResults,
+          metadata: {
+            standards_used: ['RefKG', 'I40KG', 'DPP'],
+            processing_time: Date.now() - req.startTime
+          }
+        }
+      });
+      
+    } catch (error) {
+      console.error('Enhanced search error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'Enhanced search failed'
+      });
+    }
+  }
+
+  /**
+   * Get enhanced entity with all standards
+   */
+  async getEnhancedEntity(req, res) {
+    try {
+      const { id } = req.params;
+      
+      // Get base entity data (implementation specific)
+      const entity = await this.getEntityData(id);
       
       // Enhance with I40KG quality data
-      const qualityData = await this.i40kgService.integrateCertificationData(id, clientId);
+      const qualityData = await this.i40kgService.integrateCertificationData(id);
       
       // Enhance with DPP identity data
-      const dppData = await this.dppService.generateDPPIdentity(id, clientId);
-      const authenticityData = await this.dppService.verifyProductAuthenticity(id, clientId);
+      const dppData = await this.dppService.generateDPPIdentity(id);
+      const authenticityData = await this.dppService.verifyProductAuthenticity(id);
       
-      // Get trust data
-      const trustData = await this.trustService.getTrustData(id, clientId);
-      
-      // Get manufacturer data
-      const manufacturerData = await this.manufacturerService.getManufacturerByProduct(id);
-      
-      const enhancedProduct = {
-        ...product,
+      const enhancedEntity = {
+        ...entity,
         i40kg_quality: {
           certifications: qualityData.certifications,
           quality_score: qualityData.qualityScore,
-          trust_indicators: qualityData.trustIndicators,
-          quality_summary: this.i40kgService.generateQualitySummary(qualityData)
+          trust_indicators: qualityData.trustIndicators
         },
         dpp_identity: {
           identity: dppData.dppIdentity,
           authenticity: authenticityData,
-          dpp_summary: this.dppService.generateDPPSummary(dppData)
+          eu_compliant: dppData.eu_dpp_compliant
         },
-        trust_data: trustData,
-        manufacturer_data: manufacturerData,
         enhanced_metadata: {
           standards_compliance: {
             refkg: true,
-            i40kg: qualityData.certifications.length > 0,
+            i40kg: qualityData.certifications?.length > 0,
             dpp: dppData.verification_status === 'verified'
-          },
-          overall_trust_score: this.calculateOverallTrustScore(qualityData, authenticityData, trustData),
-          llm_optimization: {
-            structured_data: true,
-            rich_context: true,
-            trust_indicators: true,
-            regulatory_compliance: authenticityData.dpp_compliance?.eu_dpp_compliant || false
           }
         }
       };
       
       res.json({
         success: true,
-        data: enhancedProduct
+        data: enhancedEntity
       });
       
     } catch (error) {
-      console.error('Enhanced product error:', error);
+      console.error('Enhanced entity error:', error);
       res.status(500).json({
         success: false,
-        error: 'Enhanced product retrieval failed'
-      });
-    }
-  }
-
-  /**
-   * Get product quality data (I40KG)
-   */
-  async getProductQuality(req, res) {
-    try {
-      const { id } = req.params;
-      const { clientId } = req.query;
-      
-      const qualityData = await this.i40kgService.integrateCertificationData(id, clientId);
-      const recommendations = await this.i40kgService.getQualityRecommendations(id, clientId);
-      
-      res.json({
-        success: true,
-        data: {
-          quality_data: qualityData,
-          recommendations: recommendations
-        }
-      });
-      
-    } catch (error) {
-      console.error('Product quality error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Product quality retrieval failed'
-      });
-    }
-  }
-
-  /**
-   * Get product DPP data
-   */
-  async getProductDPP(req, res) {
-    try {
-      const { id } = req.params;
-      const { clientId } = req.query;
-      
-      const dppData = await this.dppService.generateDPPIdentity(id, clientId);
-      const recommendations = await this.dppService.getDPPRecommendations(id, clientId);
-      
-      res.json({
-        success: true,
-        data: {
-          dpp_data: dppData,
-          recommendations: recommendations
-        }
-      });
-      
-    } catch (error) {
-      console.error('Product DPP error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Product DPP retrieval failed'
-      });
-    }
-  }
-
-  /**
-   * Verify product authenticity
-   */
-  async verifyProductAuthenticity(req, res) {
-    try {
-      const { id } = req.params;
-      const { clientId } = req.query;
-      
-      const authenticityData = await this.dppService.verifyProductAuthenticity(id, clientId);
-      
-      res.json({
-        success: true,
-        data: authenticityData
-      });
-      
-    } catch (error) {
-      console.error('Product authenticity error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Product authenticity verification failed'
-      });
-    }
-  }
-
-  /**
-   * Get enhanced trust data
-   */
-  async getEnhancedTrust(req, res) {
-    try {
-      const { productId } = req.params;
-      const { clientId } = req.query;
-      
-      const trustData = await this.trustService.getTrustData(productId, clientId);
-      const qualityData = await this.i40kgService.integrateCertificationData(productId, clientId);
-      const authenticityData = await this.dppService.verifyProductAuthenticity(productId, clientId);
-      
-      const enhancedTrust = {
-        ...trustData,
-        quality_trust: qualityData.trustIndicators,
-        authenticity_trust: {
-          authenticity_verified: authenticityData.authenticity_verified,
-          manufacturer_verified: authenticityData.manufacturer_verified,
-          supply_chain_verified: authenticityData.supply_chain_verified,
-          trust_score: authenticityData.trust_score
-        },
-        overall_trust_score: this.calculateOverallTrustScore(qualityData, authenticityData, trustData)
-      };
-      
-      res.json({
-        success: true,
-        data: enhancedTrust
-      });
-      
-    } catch (error) {
-      console.error('Enhanced trust error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Enhanced trust retrieval failed'
-      });
-    }
-  }
-
-  /**
-   * Get product compliance data
-   */
-  async getProductCompliance(req, res) {
-    try {
-      const { productId } = req.params;
-      const { clientId } = req.query;
-      
-      const qualityData = await this.i40kgService.integrateCertificationData(productId, clientId);
-      const dppData = await this.dppService.verifyProductAuthenticity(productId, clientId);
-      
-      const complianceData = {
-        quality_compliance: {
-          certifications: qualityData.certifications,
-          quality_score: qualityData.qualityScore,
-          trust_level: this.i40kgService.calculateTrustLevel(qualityData.qualityScore)
-        },
-        dpp_compliance: dppData.dpp_compliance,
-        overall_compliance: {
-          eu_market_access: dppData.dpp_compliance?.eu_dpp_compliant || false,
-          quality_standards: qualityData.certifications.length > 0,
-          regulatory_compliance: dppData.dpp_compliance?.overall_compliant || false
-        }
-      };
-      
-      res.json({
-        success: true,
-        data: complianceData
-      });
-      
-    } catch (error) {
-      console.error('Product compliance error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Product compliance retrieval failed'
+        error: 'Enhanced entity retrieval failed'
       });
     }
   }
@@ -399,10 +346,10 @@ export class EnhancedAIController {
    */
   async llmOptimizedSearch(req, res) {
     try {
-      const { query, clientId, format = 'structured' } = req.body;
+      const { query, format = 'structured' } = req.body;
       
       // Use RefKG for superior search
-      const refkgResults = await this.refkgService.refkgSearch(query, clientId);
+      const refkgResults = await this.refkgService.refkgSearch(query);
       
       // Enhance results for LLM consumption
       const llmOptimizedResults = await this.optimizeForLLM(refkgResults, format);
@@ -422,54 +369,79 @@ export class EnhancedAIController {
   }
 
   /**
-   * Get LLM-optimized product
+   * Get LLM-optimized entity
    */
-  async getLLMOptimizedProduct(req, res) {
+  async getLLMOptimizedEntity(req, res) {
     try {
       const { id } = req.params;
-      const { clientId, format = 'structured' } = req.query;
+      const { format = 'structured' } = req.query;
       
-      const enhancedProduct = await this.getEnhancedProductData(id, clientId);
-      const llmOptimizedProduct = await this.optimizeForLLM(enhancedProduct, format);
+      const enhancedEntity = await this.getEnhancedEntityData(id);
+      const llmOptimizedEntity = await this.optimizeForLLM(enhancedEntity, format);
       
       res.json({
         success: true,
-        data: llmOptimizedProduct
+        data: llmOptimizedEntity
       });
       
     } catch (error) {
-      console.error('LLM product error:', error);
+      console.error('LLM entity error:', error);
       res.status(500).json({
         success: false,
-        error: 'LLM product retrieval failed'
+        error: 'LLM entity retrieval failed'
       });
     }
   }
 
   /**
-   * Get LLM recommendations
+   * AllioIA.io: Contribute data to broader ecosystem
    */
-  async getLLMRecommendations(req, res) {
+  async contributeToAllioIA(req, res) {
     try {
-      const { query, clientId, productId } = req.body;
+      const { entityData, permissions } = req.body;
       
-      const recommendations = {
-        search_recommendations: await this.refkgService.refkgSearch(query, clientId),
-        quality_recommendations: productId ? await this.i40kgService.getQualityRecommendations(productId, clientId) : null,
-        dpp_recommendations: productId ? await this.dppService.getDPPRecommendations(productId, clientId) : null,
-        trust_recommendations: productId ? await this.trustService.getTrustRecommendations(productId, clientId) : null
-      };
+      // Implementation for contributing data to AllioIA.io
+      const contributionResult = await this.contributeDataToAllioIA(entityData, permissions);
       
       res.json({
         success: true,
-        data: recommendations
+        data: {
+          contribution_id: contributionResult.id,
+          status: 'contributed',
+          permissions: permissions
+        }
       });
       
     } catch (error) {
-      console.error('LLM recommendations error:', error);
+      console.error('AllioIA contribution error:', error);
       res.status(500).json({
         success: false,
-        error: 'LLM recommendations failed'
+        error: 'AllioIA contribution failed'
+      });
+    }
+  }
+
+  /**
+   * AllioIA.io: Get integration status
+   */
+  async getAllioIAStatus(req, res) {
+    try {
+      const status = await this.getAllioIAIntegrationStatus();
+      
+      res.json({
+        success: true,
+        data: {
+          connected: status.connected,
+          last_sync: status.lastSync,
+          data_contributed: status.dataContributed
+        }
+      });
+      
+    } catch (error) {
+      console.error('AllioIA status error:', error);
+      res.status(500).json({
+        success: false,
+        error: 'AllioIA status retrieval failed'
       });
     }
   }
@@ -477,13 +449,13 @@ export class EnhancedAIController {
   /**
    * Enhance results with I40KG quality data
    */
-  async enhanceWithI40KG(reconstructedKnowledge, clientId) {
+  async enhanceWithI40KG(reconstructedKnowledge) {
     const enhancedResults = { ...reconstructedKnowledge };
     
-    if (enhancedResults.product_recommendations?.primary_matches) {
-      for (const product of enhancedResults.product_recommendations.primary_matches) {
-        const qualityData = await this.i40kgService.integrateCertificationData(product.id, clientId);
-        product.i40kg_quality = qualityData;
+    if (enhancedResults.entity_recommendations?.primary_matches) {
+      for (const entity of enhancedResults.entity_recommendations.primary_matches) {
+        const qualityData = await this.i40kgService.integrateCertificationData(entity.id);
+        entity.i40kg_quality = qualityData;
       }
     }
     
@@ -493,15 +465,15 @@ export class EnhancedAIController {
   /**
    * Enhance results with DPP authenticity data
    */
-  async enhanceWithDPP(enhancedResults, clientId) {
+  async enhanceWithDPP(enhancedResults) {
     const finalResults = { ...enhancedResults };
     
-    if (finalResults.product_recommendations?.primary_matches) {
-      for (const product of finalResults.product_recommendations.primary_matches) {
-        const dppData = await this.dppService.generateDPPIdentity(product.id, clientId);
-        const authenticityData = await this.dppService.verifyProductAuthenticity(product.id, clientId);
-        product.dpp_identity = dppData;
-        product.dpp_authenticity = authenticityData;
+    if (finalResults.entity_recommendations?.primary_matches) {
+      for (const entity of finalResults.entity_recommendations.primary_matches) {
+        const dppData = await this.dppService.generateDPPIdentity(entity.id);
+        const authenticityData = await this.dppService.verifyProductAuthenticity(entity.id);
+        entity.dpp_identity = dppData;
+        entity.dpp_authenticity = authenticityData;
       }
     }
     
@@ -529,7 +501,7 @@ export class EnhancedAIController {
    */
   formatStructuredForLLM(data) {
     return {
-      type: 'structured_product_data',
+      type: 'structured_entity_data',
       standards: ['RefKG', 'I40KG', 'DPP'],
       data: data,
       metadata: {
@@ -559,7 +531,7 @@ export class EnhancedAIController {
    */
   formatCompactForLLM(data) {
     return {
-      type: 'compact_product_data',
+      type: 'compact_entity_data',
       essential_info: this.extractEssentialInfo(data),
       metadata: {
         optimized_for_llm: true,
@@ -572,15 +544,13 @@ export class EnhancedAIController {
    * Generate natural language summary
    */
   generateNaturalLanguageSummary(data) {
-    // Implementation for natural language summary generation
-    return "Enhanced product summary with quality certifications and authenticity verification.";
+    return "Enhanced entity summary with quality certifications and authenticity verification.";
   }
 
   /**
    * Extract essential information
    */
   extractEssentialInfo(data) {
-    // Implementation for extracting essential product information
     return {
       id: data.id,
       name: data.name,
@@ -590,35 +560,28 @@ export class EnhancedAIController {
   }
 
   /**
-   * Calculate overall quality score
+   * Get entity data (implementation specific)
    */
-  calculateOverallQualityScore(results) {
-    // Implementation for calculating overall quality score
-    return 0.85; // Placeholder
+  async getEntityData(entityId) {
+    // Implementation specific - replace with your data source
+    return {
+      id: entityId,
+      name: 'Sample Entity',
+      description: 'Sample entity description'
+    };
   }
 
   /**
-   * Calculate overall trust score
+   * Get enhanced entity data
    */
-  calculateOverallTrustScore(qualityData, authenticityData, trustData) {
-    const qualityScore = qualityData.qualityScore || 0;
-    const authenticityScore = authenticityData.trust_score || 0;
-    const trustScore = trustData.averageRating ? trustData.averageRating / 5 : 0;
-    
-    return (qualityScore * 0.4) + (authenticityScore * 0.4) + (trustScore * 0.2);
-  }
-
-  /**
-   * Get enhanced product data
-   */
-  async getEnhancedProductData(productId, clientId) {
-    const product = await this.productService.getProduct(productId);
-    const qualityData = await this.i40kgService.integrateCertificationData(productId, clientId);
-    const dppData = await this.dppService.generateDPPIdentity(productId, clientId);
-    const authenticityData = await this.dppService.verifyProductAuthenticity(productId, clientId);
+  async getEnhancedEntityData(entityId) {
+    const entity = await this.getEntityData(entityId);
+    const qualityData = await this.i40kgService.integrateCertificationData(entityId);
+    const dppData = await this.dppService.generateDPPIdentity(entityId);
+    const authenticityData = await this.dppService.verifyProductAuthenticity(entityId);
     
     return {
-      ...product,
+      ...entity,
       i40kg_quality: qualityData,
       dpp_identity: dppData,
       dpp_authenticity: authenticityData
@@ -626,50 +589,26 @@ export class EnhancedAIController {
   }
 
   /**
-   * Demo health check endpoint
+   * Contribute data to AllioIA.io (implementation specific)
    */
-  async demoHealth(req, res) {
-    res.json({
-      success: true,
-      message: 'Enhanced AI Controller is running',
-      standards: ['RefKG', 'I40KG', 'DPP'],
-      timestamp: new Date().toISOString()
-    });
+  async contributeDataToAllioIA(entityData, permissions) {
+    // Implementation specific - replace with your AllioIA.io integration
+    return {
+      id: 'contribution-' + Date.now(),
+      status: 'success'
+    };
   }
 
   /**
-   * Demo search endpoint
+   * Get AllioIA.io integration status (implementation specific)
    */
-  async demoSearch(req, res) {
-    try {
-      const { query, clientId = 'demo-client-001' } = req.body;
-      
-      if (!query) {
-        return res.status(400).json({
-          success: false,
-          error: 'Query is required'
-        });
-      }
-
-      // Test RefKG query decomposition
-      const decomposedQueries = await this.refkgService.decomposeQuery(query, clientId);
-      
-      res.json({
-        success: true,
-        data: {
-          original_query: query,
-          decomposed_queries: decomposedQueries,
-          message: 'Enhanced AI search demo successful'
-        }
-      });
-      
-    } catch (error) {
-      console.error('Demo search error:', error);
-      res.status(500).json({
-        success: false,
-        error: 'Demo search failed'
-      });
-    }
+  async getAllioIAIntegrationStatus() {
+    // Implementation specific - replace with your AllioIA.io integration
+    return {
+      connected: true,
+      lastSync: new Date().toISOString(),
+      dataContributed: 0
+    };
   }
 
   /**

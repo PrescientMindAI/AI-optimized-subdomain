@@ -1,29 +1,16 @@
 /**
- * Hybrid Controller
+ * Hybrid Controller - Reference Implementation
  * 
- * Combines the demo project's JSON-LD endpoints with our AI-optimized features.
- * Provides backward compatibility while adding advanced AI capabilities.
+ * Demonstrates hybrid API patterns combining multiple data formats
+ * and backward compatibility for AI-enhanced knowledge graphs.
  */
 
-import { ProductService } from '../services/product-service.js';
-import { SearchService } from '../services/search-service.js';
-import { TrustService } from '../services/trust-service.js';
-import { ManufacturerService } from '../services/manufacturer-service.js';
-import { CategoryService } from '../services/category-service.js';
-import { DataIngestionService } from '../ingestion/data-ingestion-service.js';
 import { JSONLDFormat } from '../formats/json-ld-format.js';
-import { authMiddleware } from '../middleware/auth.js';
-import { clientIsolationMiddleware } from '../middleware/client-isolation.js';
-import { rateLimitMiddleware } from '../middleware/rate-limit.js';
 
 export class HybridController {
   constructor() {
-    this.productService = new ProductService();
-    this.searchService = new SearchService();
-    this.trustService = new TrustService();
-    this.manufacturerService = new ManufacturerService();
-    this.categoryService = new CategoryService();
-    this.ingestionService = new DataIngestionService();
+    // Initialize format handlers
+    this.jsonLdFormat = JSONLDFormat;
   }
 
   /**
@@ -31,58 +18,58 @@ export class HybridController {
    * @param {Object} app - Express application
    */
   registerRoutes(app) {
-    // Demo project compatibility endpoints (with optional auth)
-    this.registerDemoCompatibilityRoutes(app);
+    // Demo project compatibility endpoints
+    this.registerCompatibilityRoutes(app);
     
-    // AI-optimized endpoints (with full auth)
+    // AI-optimized endpoints
     this.registerAIOptimizedRoutes(app);
     
-    // Data ingestion endpoints (admin only)
-    this.registerIngestionRoutes(app);
+    // Data format endpoints
+    this.registerFormatRoutes(app);
   }
 
   /**
-   * Register demo project compatibility routes
+   * Register compatibility routes
    */
-  registerDemoCompatibilityRoutes(app) {
-    // LLM discovery file (demo project compatibility)
+  registerCompatibilityRoutes(app) {
+    // LLM discovery file
     app.get('/.well-known/llms.txt', (req, res) => {
       const baseUrl = `${req.protocol}://${req.get('host')}`;
-      const discoveryContent = JSONLDFormat.createLLMDiscoveryFile(baseUrl);
+      const discoveryContent = this.jsonLdFormat.createLLMDiscoveryFile(baseUrl);
       res.set('Content-Type', 'text/plain');
       res.send(discoveryContent);
     });
 
-    // Products JSON-LD endpoint (demo project compatibility)
-    app.get('/products.json', async (req, res) => {
+    // Entities JSON-LD endpoint
+    app.get('/entities.json', async (req, res) => {
       try {
         const baseUrl = `${req.protocol}://${req.get('host')}`;
-        const products = await this.productService.getAllProducts();
-        const jsonLdGraph = JSONLDFormat.formatProductGraph(products, baseUrl);
+        const entities = await this.getAllEntities();
+        const jsonLdGraph = this.jsonLdFormat.formatEntityGraph(entities, baseUrl);
         res.json(jsonLdGraph);
       } catch (error) {
-        console.error('Error serving products.json:', error);
+        console.error('Error serving entities.json:', error);
         res.status(500).json({ error: 'Internal server error' });
       }
     });
 
-    // Single product by SKU (demo project compatibility)
-    app.get('/product/:sku', async (req, res) => {
+    // Single entity by ID
+    app.get('/entity/:id', async (req, res) => {
       try {
         const baseUrl = `${req.protocol}://${req.get('host')}`;
-        const product = await this.productService.getProductBySku(req.params.sku);
+        const entity = await this.getEntityById(req.params.id);
         
-        if (!product) {
-          return res.status(404).json({ error: 'Product not found' });
+        if (!entity) {
+          return res.status(404).json({ error: 'Entity not found' });
         }
         
-        const jsonLdProduct = JSONLDFormat.formatProduct(product, baseUrl);
+        const jsonLdEntity = this.jsonLdFormat.formatEntity(entity, baseUrl);
         res.json({
           "@context": "https://schema.org",
-          ...jsonLdProduct
+          ...jsonLdEntity
         });
       } catch (error) {
-        console.error('Error serving product:', error);
+        console.error('Error serving entity:', error);
         res.status(500).json({ error: 'Internal server error' });
       }
     });
@@ -91,262 +78,288 @@ export class HybridController {
     app.get('/', (req, res) => {
       const baseUrl = `${req.protocol}://${req.get('host')}`;
       res.json({
-        message: 'AI-Optimized Subdomain API',
-        description: 'Hybrid API combining JSON-LD compatibility with AI optimization',
+        message: 'AI-Enhanced Knowledge Graph API',
+        description: 'Hybrid API combining multiple formats with AI optimization',
         endpoints: {
-          // Demo project compatibility
-          'products.json': 'All products in JSON-LD format',
-          'product/:sku': 'Single product by SKU in JSON-LD format',
+          // Compatibility endpoints
+          'entities.json': 'All entities in JSON-LD format',
+          'entity/:id': 'Single entity by ID in JSON-LD format',
           '.well-known/llms.txt': 'LLM discovery file',
           
-          // AI-optimized endpoints (require auth)
-          '/api/products': 'AI-optimized products with authentication',
-          '/api/search': 'Semantic search with vector similarity',
-          '/api/vectors': 'Vector embeddings for AI models',
-          '/api/mcp': 'Model Context Protocol endpoints',
-          '/api/acp': 'AI Context Protocol endpoints',
-          '/api/graph': 'Knowledge graph queries',
+          // AI-optimized endpoints
+          'api/enhanced/search': 'Enhanced search with RefKG, I40KG, DPP',
+          'api/enhanced/entities/:id': 'Enhanced entity with all standards',
+          'api/llm/entities/:id': 'LLM-optimized entity data',
           
-          // Data ingestion (admin only)
-          '/api/ingest/shopify': 'Ingest Shopify data (admin only)',
-          '/api/ingest/woocommerce': 'Ingest WooCommerce data (admin only)'
+          // Format endpoints
+          'api/formats/vectorized': 'Vectorized data format',
+          'api/formats/mcp': 'Model Context Protocol format',
+          'api/formats/acp': 'AI Context Protocol format',
+          'api/formats/graph': 'Raw graph format'
         },
-        formats: ['json-ld', 'vector', 'mcp', 'acp', 'graph'],
-        authentication: 'Optional for JSON-LD, Required for AI endpoints',
-        rateLimit: '100 requests per minute'
+        standards: ['RefKG', 'I40KG', 'DPP'],
+        base_url: baseUrl
       });
     });
   }
 
   /**
-   * Register AI-optimized routes with full authentication
+   * Register AI-optimized routes
    */
   registerAIOptimizedRoutes(app) {
-    // Products API with AI optimization
-    app.get('/api/products', 
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { format = 'json', limit = 50, offset = 0 } = req.query;
-          const products = await this.productService.getProducts(req.clientId, { limit, offset });
-          
-          const response = this.productService.formatProductResponse(products, format);
-          res.json(response);
-        } catch (error) {
-          console.error('Error serving AI products:', error);
-          res.status(500).json({
+    // Enhanced search endpoint
+    app.post('/api/enhanced/search', async (req, res) => {
+      try {
+        const { query, format = 'structured' } = req.body;
+        
+        if (!query) {
+          return res.status(400).json({
             success: false,
-            error: {
-              code: 'PRODUCTS_ERROR',
-              message: 'Error retrieving products',
-              requestId: req.requestId
-            }
+            error: 'Query is required'
           });
         }
-      }
-    );
 
-    // Search API with semantic search
-    app.post('/api/search',
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { query, format = 'json', filters = {} } = req.body;
-          const results = await this.searchService.search(query, req.clientId, { format, filters });
-          res.json(results);
-        } catch (error) {
-          console.error('Error serving search:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'SEARCH_ERROR',
-              message: 'Error performing search',
-              requestId: req.requestId
-            }
-          });
-        }
+        const searchResults = await this.performEnhancedSearch(query);
+        
+        res.json({
+          success: true,
+          data: searchResults,
+          metadata: {
+            format: format,
+            standards: ['RefKG', 'I40KG', 'DPP'],
+            processing_time: Date.now() - req.startTime
+          }
+        });
+      } catch (error) {
+        console.error('Enhanced search error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Enhanced search failed'
+        });
       }
-    );
+    });
 
-    // Vector similarity search
-    app.post('/api/vectors',
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { vector, limit = 10, threshold = 0.7 } = req.body;
-          const results = await this.searchService.vectorSimilarity(vector, req.clientId, { limit, threshold });
-          res.json(results);
-        } catch (error) {
-          console.error('Error serving vector search:', error);
-          res.status(500).json({
+    // Enhanced entity endpoint
+    app.get('/api/enhanced/entities/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const entity = await this.getEnhancedEntity(id);
+        
+        if (!entity) {
+          return res.status(404).json({
             success: false,
-            error: {
-              code: 'VECTOR_ERROR',
-              message: 'Error performing vector search',
-              requestId: req.requestId
-            }
+            error: 'Entity not found'
           });
         }
+        
+        res.json({
+          success: true,
+          data: entity,
+          metadata: {
+            standards: ['RefKG', 'I40KG', 'DPP'],
+            enhanced: true
+          }
+        });
+      } catch (error) {
+        console.error('Enhanced entity error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Enhanced entity retrieval failed'
+        });
       }
-    );
-
-    // MCP (Model Context Protocol) endpoints
-    app.post('/api/mcp',
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { context, query, model } = req.body;
-          const results = await this.searchService.mcpSearch(context, query, req.clientId, { model });
-          res.json(results);
-        } catch (error) {
-          console.error('Error serving MCP:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'MCP_ERROR',
-              message: 'Error processing MCP request',
-              requestId: req.requestId
-            }
-          });
-        }
-      }
-    );
-
-    // ACP (AI Context Protocol) endpoints
-    app.post('/api/acp',
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { agentId, task, context } = req.body;
-          const results = await this.searchService.acpSearch(agentId, task, context, req.clientId);
-          res.json(results);
-        } catch (error) {
-          console.error('Error serving ACP:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'ACP_ERROR',
-              message: 'Error processing ACP request',
-              requestId: req.requestId
-            }
-          });
-        }
-      }
-    );
-
-    // Graph queries
-    app.post('/api/graph',
-      authMiddleware,
-      clientIsolationMiddleware,
-      rateLimitMiddleware,
-      async (req, res) => {
-        try {
-          const { query, traversal } = req.body;
-          const results = await this.searchService.graphQuery(query, req.clientId, { traversal });
-          res.json(results);
-        } catch (error) {
-          console.error('Error serving graph query:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'GRAPH_ERROR',
-              message: 'Error processing graph query',
-              requestId: req.requestId
-            }
-          });
-        }
-      }
-    );
+    });
   }
 
   /**
-   * Register data ingestion routes (admin only)
+   * Register format routes
    */
-  registerIngestionRoutes(app) {
-    // Ingest Shopify data
-    app.post('/api/ingest/shopify',
-      authMiddleware,
-      async (req, res) => {
-        try {
-          const { products, clientId } = req.body;
-          
-          if (!products || !Array.isArray(products)) {
-            return res.status(400).json({
-              success: false,
-              error: {
-                code: 'INVALID_DATA',
-                message: 'Products array is required'
-              }
-            });
-          }
-
-          const results = await this.ingestionService.ingestShopifyData(products, clientId);
-          
-          res.json({
-            success: true,
-            message: 'Data ingestion completed',
-            results: results
-          });
-        } catch (error) {
-          console.error('Error ingesting Shopify data:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'INGESTION_ERROR',
-              message: 'Error ingesting data',
-              requestId: req.requestId
-            }
-          });
-        }
+  registerFormatRoutes(app) {
+    // Vectorized format endpoint
+    app.get('/api/formats/vectorized/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const vectorizedData = await this.getVectorizedEntity(id);
+        
+        res.json({
+          success: true,
+          data: vectorizedData,
+          format: 'vectorized'
+        });
+      } catch (error) {
+        console.error('Vectorized format error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Vectorized format retrieval failed'
+        });
       }
-    );
+    });
 
-    // Ingest WooCommerce data
-    app.post('/api/ingest/woocommerce',
-      authMiddleware,
-      async (req, res) => {
-        try {
-          const { products, clientId } = req.body;
-          
-          if (!products || !Array.isArray(products)) {
-            return res.status(400).json({
-              success: false,
-              error: {
-                code: 'INVALID_DATA',
-                message: 'Products array is required'
-              }
-            });
-          }
-
-          const results = await this.ingestionService.ingestWooCommerceData(products, clientId);
-          
-          res.json({
-            success: true,
-            message: 'Data ingestion completed',
-            results: results
-          });
-        } catch (error) {
-          console.error('Error ingesting WooCommerce data:', error);
-          res.status(500).json({
-            success: false,
-            error: {
-              code: 'INGESTION_ERROR',
-              message: 'Error ingesting data',
-              requestId: req.requestId
-            }
-          });
-        }
+    // MCP format endpoint
+    app.get('/api/formats/mcp/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const mcpData = await this.getMCPEntity(id);
+        
+        res.json({
+          success: true,
+          data: mcpData,
+          format: 'mcp'
+        });
+      } catch (error) {
+        console.error('MCP format error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'MCP format retrieval failed'
+        });
       }
-    );
+    });
+
+    // ACP format endpoint
+    app.get('/api/formats/acp/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const acpData = await this.getACPEntity(id);
+        
+        res.json({
+          success: true,
+          data: acpData,
+          format: 'acp'
+        });
+      } catch (error) {
+        console.error('ACP format error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'ACP format retrieval failed'
+        });
+      }
+    });
+
+    // Raw graph format endpoint
+    app.get('/api/formats/graph/:id', async (req, res) => {
+      try {
+        const { id } = req.params;
+        const graphData = await this.getGraphEntity(id);
+        
+        res.json({
+          success: true,
+          data: graphData,
+          format: 'graph'
+        });
+      } catch (error) {
+        console.error('Graph format error:', error);
+        res.status(500).json({
+          success: false,
+          error: 'Graph format retrieval failed'
+        });
+      }
+    });
+  }
+
+  /**
+   * Get all entities (implementation specific)
+   */
+  async getAllEntities() {
+    // Implementation specific - replace with your data source
+    return [
+      { id: '1', name: 'Sample Entity 1', type: 'product' },
+      { id: '2', name: 'Sample Entity 2', type: 'service' }
+    ];
+  }
+
+  /**
+   * Get entity by ID (implementation specific)
+   */
+  async getEntityById(id) {
+    // Implementation specific - replace with your data source
+    return {
+      id: id,
+      name: `Sample Entity ${id}`,
+      type: 'product',
+      description: 'Sample entity description'
+    };
+  }
+
+  /**
+   * Perform enhanced search (implementation specific)
+   */
+  async performEnhancedSearch(query) {
+    // Implementation specific - replace with your search logic
+    return {
+      query: query,
+      results: [
+        { id: '1', name: 'Search Result 1', relevance: 0.95 },
+        { id: '2', name: 'Search Result 2', relevance: 0.87 }
+      ],
+      metadata: {
+        standards_used: ['RefKG', 'I40KG', 'DPP']
+      }
+    };
+  }
+
+  /**
+   * Get enhanced entity (implementation specific)
+   */
+  async getEnhancedEntity(id) {
+    // Implementation specific - replace with your enhanced entity logic
+    return {
+      id: id,
+      name: `Enhanced Entity ${id}`,
+      refkg_data: { query_decomposition: true },
+      i40kg_data: { quality_certifications: ['ISO', 'CE'] },
+      dpp_data: { authenticity_verified: true }
+    };
+  }
+
+  /**
+   * Get vectorized entity (implementation specific)
+   */
+  async getVectorizedEntity(id) {
+    // Implementation specific - replace with your vectorization logic
+    return {
+      id: id,
+      name: `Vectorized Entity ${id}`,
+      vector: [0.1, 0.2, 0.3, 0.4, 0.5],
+      metadata: { format: 'vectorized' }
+    };
+  }
+
+  /**
+   * Get MCP entity (implementation specific)
+   */
+  async getMCPEntity(id) {
+    // Implementation specific - replace with your MCP format logic
+    return {
+      id: id,
+      name: `MCP Entity ${id}`,
+      context: 'Model Context Protocol data',
+      metadata: { format: 'mcp' }
+    };
+  }
+
+  /**
+   * Get ACP entity (implementation specific)
+   */
+  async getACPEntity(id) {
+    // Implementation specific - replace with your ACP format logic
+    return {
+      id: id,
+      name: `ACP Entity ${id}`,
+      context: 'AI Context Protocol data',
+      metadata: { format: 'acp' }
+    };
+  }
+
+  /**
+   * Get graph entity (implementation specific)
+   */
+  async getGraphEntity(id) {
+    // Implementation specific - replace with your graph format logic
+    return {
+      id: id,
+      name: `Graph Entity ${id}`,
+      nodes: [{ id: 'node1', type: 'entity' }],
+      edges: [{ from: 'node1', to: 'node2', type: 'relationship' }],
+      metadata: { format: 'graph' }
+    };
   }
 } 

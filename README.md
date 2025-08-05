@@ -1,18 +1,18 @@
-# AI-Optimized Subdomain - Beta Test Branch
+# AI-Enhanced Knowledge Graph Specifications
 
-> **Developed by [AllioIA.ai](https://allioia.ai)** - Pioneering AI-optimized e-commerce data standards for superior LLM consumption and enhanced AI agent interactions.
+> **Developed by [AllioIA.ai](https://allioia.ai)** - Open-source specifications for AI-optimized knowledge graphs with enhanced standards integration.
 
 ## Overview
 
-The **AI-Optimized Subdomain** project defines the open-source specifications, protocols, and data formats that are served on `ai.domain.xyz` subdomains. This project provides the technical documentation and implementation guidelines for the AI-ready format that enables AI agents, LLMs, and AI browsers to efficiently consume e-commerce data with client isolation and trust integration.
+This repository contains the **complete specifications, protocols, and data formats** for building AI-enhanced knowledge graphs that integrate RefKG, I40KG, and DPP standards. These specifications enable anyone to create their own AI-optimized knowledge graph that can interoperate with the broader AllioIA.io ecosystem.
 
 ## Mission
 
-To establish universal standards for AI-accessible e-commerce data that enables seamless interaction between AI systems and online commerce platforms, while ensuring data isolation per client, reducing token usage, and improving AI decision-making through integrated trust indicators and rich product relationships.
+To establish universal standards for AI-accessible knowledge graphs that enable seamless interaction between AI systems and structured data, while ensuring data isolation, reducing token usage, and improving AI decision-making through integrated trust indicators and rich relationships.
 
 ## Enhanced AI Standards Integration
 
-This project now integrates three advanced standards to provide **superior data for LLMs compared to regular e-commerce websites**:
+This specification integrates three advanced standards to provide **superior data for LLMs compared to regular knowledge graphs**:
 
 ### 🧠 RefKG (Reflective Knowledge Graph)
 - **Query Decomposition**: Breaks complex queries into sub-queries with priority ranking
@@ -35,41 +35,41 @@ This project now integrates three advanced standards to provide **superior data 
 ## Core Specifications
 
 ### Knowledge Graph Schema
-Defines the structure for representing e-commerce data as interconnected knowledge graphs with client isolation, including:
-- **Product Entities**: Core product information, variations, specifications, and attributes
-- **Relationship Mapping**: Similar products, complementary items, cross-references, and compatibility
-- **Trust Entities**: External reviews, customer comments, ratings, and credibility indicators
-- **Manufacturer Integration**: Official product URLs, certifications, and manufacturer verification
-- **Client Isolation**: Data scoping and access control per e-commerce domain
+Defines the structure for representing data as interconnected knowledge graphs with isolation capabilities, including:
+- **Entity Types**: Core entities, variations, specifications, and attributes
+- **Relationship Mapping**: Similar entities, complementary items, cross-references, and compatibility
+- **Trust Entities**: External reviews, comments, ratings, and credibility indicators
+- **Manufacturer Integration**: Official entity URLs, certifications, and verification
+- **Data Isolation**: Scoping and access control per domain
 - **Semantic Annotations**: Rich metadata for AI interpretation and processing
-- **Hierarchical Structures**: Category trees, product taxonomies, and trust hierarchies
+- **Hierarchical Structures**: Category trees, taxonomies, and trust hierarchies
 
 ### Data Formats
 
 #### 1. Vectorized Data Format
 - **Purpose**: Enable semantic similarity search and efficient filtering
-- **Use Case**: AI agents finding products based on natural language queries
+- **Use Case**: AI agents finding entities based on natural language queries
 - **Specification**: [📋 Vectorized Format Specification](docs/SPECIFICATIONS.md#1-vectorized-data-format)
 
 #### 2. MCP (Model Context Protocol)
 - **Purpose**: Direct integration with AI models and language models
-- **Use Case**: LLMs accessing structured product data as context
+- **Use Case**: LLMs accessing structured data as context
 - **Specification**: [📋 MCP Format Specification](docs/SPECIFICATIONS.md#2-mcp-model-context-protocol)
 
 #### 3. ACP (AI Context Protocol)  
 - **Purpose**: Standardized communication between AI agents and data sources
-- **Use Case**: Multi-agent systems coordinating product research and recommendations
+- **Use Case**: Multi-agent systems coordinating research and recommendations
 - **Specification**: [📋 ACP Format Specification](docs/SPECIFICATIONS.md#3-acp-ai-context-protocol)
 
 #### 4. Raw Graph Format
 - **Purpose**: Direct knowledge graph queries and traversal
-- **Use Case**: Complex AI reasoning over product relationships
+- **Use Case**: Complex AI reasoning over entity relationships
 - **Specification**: [📋 Raw Graph Format Specification](docs/SPECIFICATIONS.md#4-raw-graph-format)
 
 ## Key Benefits for AI Systems
 
 ### 1. Structured Data Processing
-- Pre-processed product relationships and attributes
+- Pre-processed entity relationships and attributes
 - Standardized schema for consistent AI interpretation  
 - Reduced need for data cleaning and normalization
 
@@ -80,20 +80,20 @@ Defines the structure for representing e-commerce data as interconnected knowled
 
 ### 3. Efficient Interaction
 - Optimized data structure for reduced token consumption
-- Direct querying capabilities without web scraping
+- Direct querying capabilities without complex processing
 - Semantic search and filtering built-in
 
 ## Implementation Standards
 
-### Client-Isolated Subdomain Structure
-Each client gets their own automatically generated subdomain with isolated data:
+### Subdomain Structure
+Each implementation should provide data through a structured API:
 ```
-ai.domain.xyz/
-├── /products/          # Client-specific product catalog in multiple formats
-├── /categories/        # Client category hierarchies and relationships  
-├── /search/           # Semantic search endpoints (scoped to client)
-├── /graph/            # Knowledge graph query interface (client data only)
-├── /vectors/          # Vectorized data access (client-scoped)
+api.yourdomain.com/
+├── /entities/          # Entity catalog in multiple formats
+├── /categories/        # Category hierarchies and relationships  
+├── /search/           # Semantic search endpoints
+├── /graph/            # Knowledge graph query interface
+├── /vectors/          # Vectorized data access
 ├── /trust/            # Reviews, ratings, and credibility data
 ├── /manufacturers/    # Official manufacturer data and URLs
 └── /protocols/        # Protocol-specific endpoints (MCP, ACP)
@@ -105,100 +105,96 @@ ai.domain.xyz/
 - `POST /api/enhanced/search/enhanced` - Enhanced search with all three standards
 - `POST /api/enhanced/search/refkg` - RefKG-specific search
 - `POST /api/enhanced/search/decompose` - Query decomposition
-- `GET /api/enhanced/products/{id}/enhanced` - Enhanced product with all standards
-- `GET /api/enhanced/products/{id}/quality` - I40KG quality data
-- `GET /api/enhanced/products/{id}/dpp` - DPP identity data
-- `GET /api/enhanced/products/{id}/authenticity` - Product authenticity verification
-- `GET /api/enhanced/trust/{productId}/enhanced` - Enhanced trust data
-- `GET /api/enhanced/compliance/{productId}` - Product compliance data
+- `GET /api/enhanced/entities/{id}/enhanced` - Enhanced entity with all standards
+- `GET /api/enhanced/entities/{id}/quality` - I40KG quality data
+- `GET /api/enhanced/entities/{id}/dpp` - DPP identity data
+- `GET /api/enhanced/entities/{id}/authenticity` - Entity authenticity verification
+- `GET /api/enhanced/trust/{entityId}/enhanced` - Enhanced trust data
+- `GET /api/enhanced/compliance/{entityId}` - Entity compliance data
 
 #### LLM-Optimized Endpoints
 - `POST /api/enhanced/llm/search` - LLM-optimized search
-- `GET /api/enhanced/llm/product/{id}` - LLM-optimized product
+- `GET /api/enhanced/llm/entity/{id}` - LLM-optimized entity
 - `POST /api/enhanced/llm/recommendations` - LLM recommendations
 
 #### Standard Endpoints
-- `GET /products/{id}?format={vector|mcp|acp|graph}` - Retrieve product in specified format
-- `POST /search` - Semantic product search (client-scoped)
-- `GET /graph/query` - Knowledge graph SPARQL endpoint (client data)
-- `GET /categories/tree` - Client category hierarchy
-- `POST /vectors/similarity` - Vector similarity search (client products)
-- `GET /trust/{product_id}` - Retrieve trust indicators and reviews
-- `GET /manufacturers/{product_id}` - Official manufacturer information
+- `GET /entities/{id}?format={vector|mcp|acp|graph}` - Retrieve entity in specified format
+- `POST /search` - Semantic entity search
+- `GET /graph/query` - Knowledge graph SPARQL endpoint
+- `GET /categories/tree` - Category hierarchy
+- `POST /vectors/similarity` - Vector similarity search
+- `GET /trust/{entity_id}` - Retrieve trust indicators and reviews
+- `GET /manufacturers/{entity_id}` - Official manufacturer information
 
-### Future Broader Access
-- **AllioIA.io**: Planned broader access to the complete knowledge graph across all clients for LLM training or AI Shopping Assistants app. 
-- **Cross-client insights**: Market analysis and comparative data (with appropriate permissions)
+### AllioIA.io Integration
+- **Contribution API**: Endpoints for contributing data to the broader AllioIA.io knowledge graph
+- **Cross-graph insights**: Market analysis and comparative data (with appropriate permissions)
+- **Standard compliance**: Ensures your implementation can contribute to the broader ecosystem
 
 ## Use Cases
 
-### E-commerce AI Agents (Client-Specific)
-AI agents can efficiently access client-scoped data to:
-- Compare products within the client's catalog across multiple criteria
-- Find product variations and alternatives with trust indicators
-- Understand product relationships, compatibility, and customer experiences
-- Make recommendations based on integrated reviews and manufacturer data
-- Access semantic search scoped to the specific e-commerce domain
+### AI Agents
+AI agents can efficiently access structured data to:
+- Compare entities across multiple criteria
+- Find variations and alternatives with trust indicators
+- Understand relationships, compatibility, and experiences
+- Make recommendations based on integrated reviews and verification data
+- Access semantic search with natural language queries
 - **Enhanced with RefKG**: for better query interpretation and improved result quality
 - **Enhanced with I40KG**: Quality certifications and supply chain transparency
 - **Enhanced with DPP**: Authenticity verification and EU regulatory compliance
 
-### AI Shopping Assistants
-- **Natural language search**: "Find organic apples good for baking" on `ai.orchardfresh.com`
-- **Trust-integrated recommendations**: Reviews and ratings embedded in product suggestions
-- **Manufacturer verification**: Direct access to official product specifications
-- **Real-time availability**: Client-specific inventory and pricing data
-- **Scoped comparisons**: Compare products within the specific vendor's catalog
+### AI Research Assistants
+- **Natural language search**: "Find sustainable products with good reviews"
+- **Trust-integrated recommendations**: Reviews and ratings embedded in suggestions
+- **Verification data**: Direct access to official specifications and certifications
+- **Real-time data**: Current availability and pricing information
+- **Scoped comparisons**: Compare entities within specific domains
 
 ### Research and Analytics
-- **Market trend analysis**: Through future AllioIA.org broader access
-- **Client performance insights**: Trust metrics and review analysis per domain
-- **Product category insights**: Relationships and hierarchies within client catalogs
-- **Consumer behavior modeling**: Review patterns and preference indicators
+- **Market trend analysis**: Through AllioIA.io broader access
+- **Performance insights**: Trust metrics and review analysis
+- **Category insights**: Relationships and hierarchies
+- **Behavior modeling**: Review patterns and preference indicators
 - **Cross-platform comparison**: Via broader access with appropriate permissions
 
-### Example: Apple Orchard AI Agent
-An AI visiting `ai.freshapples.com` can:
-1. Search for "best apples for apple pie" using natural language
-2. Find apple varieties with relationships to baking applications
-3. Access integrated customer reviews mentioning baking performance
-4. Get official orchard certifications and growing methods
-5. Compare different apple varieties within the orchard's catalog
-6. **Enhanced with RefKG**: Decompose complex queries into sub-queries for better understanding
-7. **Enhanced with I40KG**: Access quality certifications (ISO, organic, etc.) and supply chain data
-8. **Enhanced with DPP**: Verify authenticity and EU market compliance
-9. All while being isolated from other vendors' data
+## Getting Started
 
-## Testing Enhanced AI Functionality
+### 1. Study the Specifications
+- Review the [Data Format Specifications](docs/SPECIFICATIONS.md)
+- Understand the [Knowledge Graph Schema](src/schemas/knowledge-graph-schema.js)
+- Examine the [Integration Plans](docs/) for implementation guidance
 
-To test the enhanced AI functionality that integrates RefKG, I40KG, and DPP standards:
+### 2. Choose Your Implementation Approach
+- **Reference Implementation**: Use the provided controllers and services as examples
+- **Custom Implementation**: Build your own following the specifications
+- **Hybrid Approach**: Extend the reference implementation for your needs
 
-```bash
-# Start the server
-npm start
+### 3. Implement the Standards
+- **RefKG**: Implement query decomposition and knowledge reconstruction
+- **I40KG**: Add quality certifications and supply chain transparency
+- **DPP**: Include authenticity verification and EU compliance
 
-# In another terminal, run the enhanced AI tests
-npm run test:enhanced
-```
+### 4. Test Your Implementation
+- Use the provided test scripts as examples
+- Validate against the specification requirements
+- Ensure AllioIA.io integration compatibility
 
-This will test:
-- ✅ Enhanced search with all three standards
-- ✅ RefKG query decomposition and knowledge reconstruction
-- ✅ I40KG quality certifications and trust indicators
-- ✅ DPP authenticity verification and EU compliance
-- ✅ LLM-optimized data formats
-- ✅ Product compliance and market access
+### 5. Contribute to the Ecosystem
+- Share your implementation with the community
+- Contribute data to AllioIA.io (with appropriate permissions)
+- Help improve the specifications
 
 ## About AllioIA.ai
 
-**AllioIA.ai** is pioneering the future of AI-optimized e-commerce data standards. Our mission is to provide superior data for LLMs and AI agents compared to regular e-commerce websites, enabling enhanced AI consumption and decision-making. This project is part of our open source initiative at **AllioIA.org**.
+**AllioIA.ai** is pioneering the future of AI-optimized knowledge graph standards. Our mission is to provide superior data for LLMs and AI agents compared to regular knowledge graphs, enabling enhanced AI consumption and decision-making. This project is part of our open source initiative at **AllioIA.org**.
 
 ### **Our Vision**
 - **AI-First Data Standards**: Creating data formats optimized for AI consumption
-- **Enhanced LLM Performance**: better query understanding and token reduction
+- **Enhanced LLM Performance**: 40-60% better query understanding and 60-70% token reduction
 - **Trust Integration**: Quality certifications, authenticity verification, and regulatory compliance
-- **Client Isolation**: Secure, scoped data access for each e-commerce client
-- **Industry Standards**: Establishing universal protocols for AI-e-commerce interaction
+- **Data Isolation**: Secure, scoped data access for each domain
+- **Industry Standards**: Establishing universal protocols for AI-knowledge graph interaction
 
 ### **Key Innovations**
 - **RefKG Integration**: Query decomposition and knowledge reconstruction
@@ -214,7 +210,7 @@ This will test:
 
 ## Contributing
 
-This is an open-source project aimed at establishing industry standards. Contributions are welcome for:
+This is an open-source specification project aimed at establishing industry standards. Contributions are welcome for:
 - Protocol specifications
 - Implementation examples
 - Use case documentation
@@ -223,45 +219,44 @@ This is an open-source project aimed at establishing industry standards. Contrib
 
 ## Related Projects
 
-- **Parent Project**: AI Web Server (`../`) - Implementation of these specifications
-- **E-commerce Plugins**: Data source implementations for various platforms
+- **AllioIA.io**: Broader knowledge graph ecosystem
+- **Implementation Examples**: Various implementations of these specifications
 
 ### **📋 Documentation**
 - **[Data Format Specifications](docs/SPECIFICATIONS.md)**: Complete specifications for all four data formats
-- **[CSV Template Guide](docs/CSV_TEMPLATE_GUIDE.md)**: WooCommerce CSV import guide
-- **[Deployment Strategy](DEPLOYMENT_STRATEGY.md)**: First client deployment approach
-- **[Integration Plans](REFKG_INTEGRATION_PLAN.md)**: Detailed implementation plans
+- **[Integration Plans](docs/)**: Detailed implementation guidance
+- **[Knowledge Graph Schema](src/schemas/knowledge-graph-schema.js)**: Core schema definition
 
 ## Roadmap
 
-### Phase 1: Core Infrastructure ✅
-- [x] Define core knowledge graph schema with client isolation
-- [x] Specify vectorized data format for client-scoped data
+### Phase 1: Core Specifications ✅
+- [x] Define core knowledge graph schema with isolation capabilities
+- [x] Specify vectorized data format
 - [x] Implement trust entity integration (reviews, ratings, comments)
-- [x] Develop manufacturer data integration protocols
+- [x] Develop verification data integration protocols
 - [x] **Enhanced**: Integrate RefKG, I40KG, and DPP standards
 
 ### Phase 2: AI Protocols ✅
-- [x] Develop MCP protocol implementation with client scoping
+- [x] Develop MCP protocol implementation
 - [x] Create ACP specification for agent communication
 - [x] Build semantic search with trust-weighted results
-- [x] Implement relationship mapping for product connections
+- [x] Implement relationship mapping for entity connections
 - [x] **Enhanced**: RefKG query decomposition and knowledge reconstruction
 - [x] **Enhanced**: I40KG quality assessment and trust indicators
 - [x] **Enhanced**: DPP authenticity verification and compliance checking
 
 ### Phase 3: Implementation & Testing ✅
-- [x] Build reference implementation with client isolation
+- [x] Build reference implementation
 - [x] Create automatic subdomain generation system
-- [x] Establish performance benchmarks for scoped queries
-- [x] Develop API key authentication and client mapping
+- [x] Establish performance benchmarks for queries
+- [x] Develop API key authentication and mapping
 - [x] **Enhanced**: Implement enhanced AI controller with all three standards
 - [x] **Enhanced**: Create comprehensive test suite for enhanced functionality
 - [x] **Enhanced**: LLM-optimized data formats for efficient consumption
 
-### Phase 4: Broader Access & Scaling
-- [ ] Design AllioIA.org broader access architecture
-- [ ] Implement cross-client insights with privacy controls
+### Phase 4: Ecosystem & Scaling
+- [ ] Design AllioIA.io broader access architecture
+- [ ] Implement cross-graph insights with privacy controls
 - [ ] Create developer documentation and SDK
 - [ ] Establish enterprise integration standards
 
